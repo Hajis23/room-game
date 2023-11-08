@@ -1,11 +1,10 @@
-# Distributed Systems :fire: :fire: :fire:
+# Room game
 
-University course project repository.
+Distributed systems university course project repository.
 
-Ensimmäinen idea olisi tehdä peli, jossa eri osat kartasta toteutetaan eri palvelimilla.
-Palvelimien ohjelmien rakenne on keskenään samankaltainen.
+Game with rooms in different servers. Players can move in the rooms. There is different programs for routing client for servers, authentication, backup and etc.
 
-Voidaan käyttää `socket.io` kirjastoa palvelinten väliseen kommunikaatioon.
+Use [Express](https://expressjs.com/) or [socket.io](socket.io) libraries for server communications. User interface is with [React](https://react.dev/) framework.
 
 ## Group
 - Elias
