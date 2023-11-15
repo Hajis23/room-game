@@ -1,6 +1,7 @@
 {
-	"name": "phaser3-typescript-vite-template",
+	"name": "room-game-client",
 	"private": true,
+	"author": "Hajis23",
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
