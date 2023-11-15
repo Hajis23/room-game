@@ -8,7 +8,7 @@ Game with rooms in different servers. Players can move in the rooms. There is di
 
 ## Setup and running
 
-To setup and start the client in dev mode with hot reload, ls to `client`.
+To setup the client, ls to `client`.
 
 Install dependencies 
 ```
