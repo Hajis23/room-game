@@ -1,0 +1,19 @@
+{
+	"name": "phaser3-typescript-vite-template",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"start": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"vite-plugin-favicons-inject": "^2.2.0",
+		"eslint": "^8.53.0",
+		"vite": "^4.5.0"
+	},
+	"dependencies": {
+		"phaser": "^3.70.0"
+	}
+}
