@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { sendInputMessage } from './socket';
 
 export default class HelloWorldScene extends Phaser.Scene {
 	keys = null;
@@ -92,6 +93,25 @@ export default class HelloWorldScene extends Phaser.Scene {
 		this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 		this.cameras.main.setZoom(6);
     this.cameras.main.startFollow(this.player);
+
+		// Send input messages to server every 100ms. Save the timer so we can for example cancel it later.
+		this.inputInterval = this.time.addEvent({
+			callback: () => {
+				if (this.isDead) return;
+				const input = {
+					left: this.keys.left.isDown,
+					right: this.keys.right.isDown,
+					up: this.keys.up.isDown,
+					down: this.keys.down.isDown,
+					space: this.keys.space.isDown,
+				}
+				// We could optimize this in many ways, for example not sending message if input is same as last time
+				sendInputMessage(input);
+			},
+			callbackScope: this,
+			delay: 100,
+			loop: true,
+		});
 	}
 
 	update() {
@@ -139,6 +159,5 @@ export default class HelloWorldScene extends Phaser.Scene {
 		} else {
 			this.player.anims.play('idle', true);
 		}
-
 	}
 }
