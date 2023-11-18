@@ -5,7 +5,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
 	},
 	"devDependencies": {
 		"eslint": "^8.54.0",

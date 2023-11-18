@@ -22,6 +22,10 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
+  ignorePatterns: ['vite.config.js'],
   rules: {
+    'max-len': ['error', { code: 120 }],
+    'no-console': 'off',
+    'import/prefer-default-export': 'off',
   },
 };
