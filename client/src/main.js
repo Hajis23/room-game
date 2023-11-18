@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-import HelloWorldScene from './HelloWorldScene';
+import MainScene from './MainScene';
 
 export default new Phaser.Game({
   type: Phaser.AUTO,
@@ -12,8 +12,8 @@ export default new Phaser.Game({
     default: 'arcade',
     arcade: {
       gravity: { y: 0 },
-      // debug: true,
+      debug: true,
     },
   },
-  scene: [HelloWorldScene],
+  scene: [MainScene],
 });
