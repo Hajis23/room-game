@@ -4,9 +4,12 @@ import MainScene from './MainScene';
 
 export default new Phaser.Game({
   type: Phaser.AUTO,
-  parent: 'app',
-  width: 1000,
-  height: 800,
+  parent: 'phaser-container',
+  scale: {
+		mode: Phaser.Scale.ScaleModes.RESIZE,
+		width: window.innerWidth,
+		height: window.innerHeight,
+	},
   pixelArt: true,
   physics: {
     default: 'arcade',
