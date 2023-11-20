@@ -12,6 +12,7 @@
 		"eslint": "^8.54.0",
 		"eslint-config-airbnb-base": "^15.0.0",
 		"eslint-plugin-import": "^2.29.0",
+		"eslint-plugin-react": "^7.33.2",
 		"husky": "^8.0.3"
 	}
 }
