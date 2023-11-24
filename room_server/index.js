@@ -12,7 +12,11 @@ const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 const app = express();
 const httpServer = createServer(app);
 const client_io = new Server(httpServer);
-const server_io = new Server(PORT2);
+const server_io = new Server(PORT2, {
+  cors: {
+	  origin: process.env.VITE_ADDRESS
+  }
+});
 
 let localState = [NAME];
 let neighbourStates = {};
@@ -47,6 +51,9 @@ client_io.on('connection', (socket) => {
     removeFromState(data);
     console.log("modified state:", localState);
   });
+  socket.on("input", (data) => {
+    console.log("modified state:", data);
+  });
 
   socket.on("request_relocation", (data, respond) => {
     if(localState.includes(data))
@@ -63,9 +70,12 @@ client_io.on('connection', (socket) => {
 server_io.on('connection', (socket) => {
   console.log('a server connected', socket.id);
 
+  socket.on("input", (data) => {
+    console.log("modified state:", data);
+  });
   socket.on('share_local', (name, local) => {
     neighbourStates[name] = local;
-    console.log(name,"shared local:", local)
+    //console.log(name,"shared local:", local)
   });
 
   socket.on('take_state', (name, state) => {

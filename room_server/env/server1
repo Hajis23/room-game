@@ -1,4 +1,5 @@
 HTTP_PORT=3000
 SOCK_PORT=3001
 NAME=server1
+VITE_ADDRESS=http://localhost:8000
 OTHER_SERVERS=["localhost:4001"]
