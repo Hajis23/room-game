@@ -1,5 +1,6 @@
 const { Server } = require('socket.io');
 const { io } = require("socket.io-client"); 
+const startGame = require('./src/game');
 
 const NAME = process.env.NAME;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
@@ -86,3 +87,7 @@ setInterval(() => serverSockets.forEach(s => s.emit("share_local", NAME, localSt
 
 // Broadcast state to all clients
 setInterval(() => client_io.emit("updated_state", getCombinedState()), 1000);
+
+
+// Start the game
+startGame();
