@@ -1,18 +1,11 @@
-const express = require('express');
-const { createServer } = require('node:http');
-const { join } = require('node:path');
 const { Server } = require('socket.io');
 const { io } = require("socket.io-client"); 
 
 const NAME = process.env.NAME;
-const PORT = process.env.HTTP_PORT;
-const PORT2 = process.env.SOCK_PORT;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 
-const app = express();
-const httpServer = createServer(app);
-const client_io = new Server(httpServer);
-const server_io = new Server(PORT2, {
+const server_io = new Server(process.env.SERVER_PORT);
+const client_io = new Server(process.env.CLIENT_PORT, {
   cors: {
 	  origin: process.env.VITE_ADDRESS
   }
@@ -51,8 +44,9 @@ client_io.on('connection', (socket) => {
     removeFromState(data);
     console.log("modified state:", localState);
   });
+  
   socket.on("input", (data) => {
-    console.log("modified state:", data);
+    console.log("input:", data);
   });
 
   socket.on("request_relocation", (data, respond) => {
@@ -70,9 +64,6 @@ client_io.on('connection', (socket) => {
 server_io.on('connection', (socket) => {
   console.log('a server connected', socket.id);
 
-  socket.on("input", (data) => {
-    console.log("modified state:", data);
-  });
   socket.on('share_local', (name, local) => {
     neighbourStates[name] = local;
     //console.log(name,"shared local:", local)
@@ -89,12 +80,6 @@ server_io.on('connection', (socket) => {
 });
 
 
-// Serve webpage
-app.get('/', (req, res) => res.sendFile(join(__dirname, 'index.html')));
-httpServer.listen(PORT, () => {
-  console.log(`server ${NAME} running at http://localhost:${PORT}`);
-  console.log(`other servers: ${neighbourList}`);
-});
 
 // Periodically share local state with other servers
 setInterval(() => serverSockets.forEach(s => s.emit("share_local", NAME, localState)), 1000);

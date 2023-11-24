@@ -2,7 +2,7 @@
 
 import io from "socket.io-client"
 
-const socket = io("ws://localhost:3001");
+const socket = io("ws://localhost:3000");
 
 export const sendInputMessage = async (input) => {
   console.log('Sending input message:', input);
