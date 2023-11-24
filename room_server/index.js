@@ -2,14 +2,24 @@ const { Server } = require('socket.io');
 const { io } = require("socket.io-client"); 
 const startGame = require('./src/game');
 
+// A simple http server to ping:
+const http = require('http');
+const server = http.createServer((req, res) => {
+  console.log("pinged")
+  res.writeHead(200);
+  res.end('ok');
+});
+
+server.listen(process.env.CLIENT_PORT);
+
 const NAME = process.env.NAME;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 
 const server_io = new Server(process.env.SERVER_PORT);
-const client_io = new Server(process.env.CLIENT_PORT, {
+const client_io = new Server(server, {
   cors: {
-	  origin: process.env.VITE_ADDRESS
-  }
+    origin: '*',
+  },
 });
 
 let localState = [NAME];
@@ -67,7 +77,7 @@ server_io.on('connection', (socket) => {
 
   socket.on('share_local', (name, local) => {
     neighbourStates[name] = local;
-    //console.log(name,"shared local:", local)
+    // console.log(name,"shared local:", local)
   });
 
   socket.on('take_state', (name, state) => {
@@ -90,4 +100,6 @@ setInterval(() => client_io.emit("updated_state", getCombinedState()), 1000);
 
 
 // Start the game
-startGame();
+startGame(client_io);
+
+console.log(`Server ${NAME} listening on port ${process.env.SERVER_PORT} and ${process.env.CLIENT_PORT}`)

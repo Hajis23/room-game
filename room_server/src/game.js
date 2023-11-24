@@ -1,6 +1,35 @@
 const Matter = require('matter-js');
 
-const startGame = () => {
+/**
+ * Send the body's relevant fields to the client
+ * @param {Matter.Body} body 
+ */
+const transformBodyToData = (body) => {
+  return {
+    position: body.position,
+    velocity: body.velocity,
+    angle: body.angle,
+    angularVelocity: body.angularVelocity,
+  };
+}
+
+/**
+ * @param {SocketIO} io
+ * @param {Matter.Body[]} bodies 
+ */
+const processUpdate = (io, bodies) => {
+  // Check if bodies are leaving the room?
+
+  // Process player input?
+
+  // Send the bodies' data to the clients
+  io.emit("update", bodies.map(transformBodyToData));
+}
+
+/**
+ * @param {SocketIO} io
+ */
+const startGame = (io) => {
   const engine = Matter.Engine.create();
 
   const boxA = Matter.Bodies.rectangle(400, 200, 80, 80);
@@ -13,8 +42,7 @@ const startGame = () => {
   const tickTime = 1000 / 10;
   setInterval(() => {
     Matter.Engine.update(engine, tickTime);
-    // Log this to see physics running on server:
-    // console.log(boxA.position);
+    processUpdate(io, engine.world.bodies);
   }, tickTime);
 }
 
