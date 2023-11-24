@@ -6,6 +6,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: room_server
+    volumes:
+      - ./:/usr/src/app
     network_mode: "host"
     env_file: ./env/server1
 
@@ -13,6 +16,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: room_server
+    volumes:
+      - ./:/usr/src/app
     network_mode: "host"
     env_file: ./env/server2
 
@@ -20,5 +26,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    network_mode: "host"
-    env_file: ./env/server3 
+    # network_mode: "host"
+    image: room_server
+    volumes:
+      - ./:/usr/src/app
+    env_file: ./env/server3

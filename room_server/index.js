@@ -46,7 +46,7 @@ client_io.on('connection', (socket) => {
     localState = [...localState, data]
     console.log("modified state:", localState);
   });
-  
+
   socket.on("delete_state", (data) => {
     removeFromState(data);
     console.log("modified state:", localState);
@@ -61,7 +61,7 @@ client_io.on('connection', (socket) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("client disconnected", socket.id);
+    console.log("client disconnectedasd", socket.id);
   })
 });
 
