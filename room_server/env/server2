@@ -1,0 +1,4 @@
+HTTP_PORT=4000
+SOCK_PORT=4001
+NAME=server2
+OTHER_SERVERS=["localhost:3001", "localhost:5001"]
