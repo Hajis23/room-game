@@ -5,6 +5,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
+		"client": "cd client && npm run start",
+		"room_server": "cd room_server && ./run.sh",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix"
 	},
