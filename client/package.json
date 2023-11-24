@@ -10,17 +10,18 @@
 		"preview": "vite preview"
 	},
 	"devDependencies": {
-		"vite": "^4.5.0",
-		"vite-plugin-favicons-inject": "^2.2.0",
 		"@vitejs/plugin-react": "^4.2.0",
 		"eslint": "^8.53.0",
 		"eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.4"
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"eslint-plugin-react-refresh": "^0.4.4",
+		"vite": "^4.5.0",
+		"vite-plugin-favicons-inject": "^2.2.0"
 	},
 	"dependencies": {
 		"phaser": "^3.70.0",
 		"react": "^18.2.0",
-		"react-dom": "^18.2.0"
+		"react-dom": "^18.2.0",
+		"socket.io-client": "^4.7.2"
 	}
 }
