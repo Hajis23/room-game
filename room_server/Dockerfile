@@ -1,8 +1,10 @@
 FROM node:21-alpine3.17
 
-COPY package.json app/package.json
+WORKDIR /usr/src/app
 
-WORKDIR app
-RUN npm install
+COPY package* ./
+RUN npm i
+
 COPY . .
-CMD ["node", "index.js"]
+
+CMD ["npm", "run", "dev"]
