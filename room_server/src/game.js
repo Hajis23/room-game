@@ -1,4 +1,10 @@
 const Matter = require('matter-js');
+const createCollisionObjects = require('./tiledMapParser');
+
+/**
+ * @type {Matter.Engine} The global engine object
+ */
+let engine = null;
 
 /**
  * Send the body's relevant fields to the client
@@ -18,25 +24,28 @@ const transformBodyToData = (body) => {
  * @param {Matter.Body[]} bodies 
  */
 const processUpdate = (io, bodies) => {
+  const dynamicBodies = bodies.filter((body) => body.type !== "collision")
+
   // Check if bodies are leaving the room?
 
   // Process player input?
 
   // Send the bodies' data to the clients
-  io.emit("update", bodies.map(transformBodyToData));
+  io.emit("update", dynamicBodies.map(transformBodyToData));
 }
 
 /**
  * @param {SocketIO} io
  */
 const startGame = (io) => {
-  const engine = Matter.Engine.create();
+  engine = Matter.Engine.create({
+    gravity: {
+      x: 0,
+      y: 0,
+    },
+  });
 
-  const boxA = Matter.Bodies.rectangle(400, 200, 80, 80);
-  const boxB = Matter.Bodies.rectangle(450, 50, 80, 80);
-  const ground = Matter.Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-
-  Matter.Composite.add(engine.world, [boxA, boxB, ground]);
+  Matter.Composite.add(engine.world, createCollisionObjects());
 
   // Run the game at 10 ticks per second
   const tickTime = 1000 / 10;
