@@ -11,7 +11,7 @@ const createPlayer = (id) => {
     0,
     50,
     50,
-    { isStatic: false, type: "player" }
+    { isStatic: false }
   );
 
   players[id] = player;
@@ -45,7 +45,7 @@ const transformBodyToData = (body) => {
  * @param {Matter.Body[]} bodies 
  */
 const processUpdate = (io, bodies) => {
-  const dynamicBodies = bodies.filter((body) => body.type !== "collision")
+  const dynamicBodies = bodies.filter((body) => !body.isStatic)
 
   // Check if bodies are leaving the room?
 
@@ -66,13 +66,21 @@ const startGame = (io) => {
     },
   });
 
-  Matter.Composite.add(engine.world, createCollisionObjects());
+  const objects = createCollisionObjects();
+  console.log(objects)
+  objects.forEach((object) => {
+    Matter.Composite.add(engine.world, object);
+  });
+
+  const ground = Matter.Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+  Matter.Composite.add(engine.world, ground);
 
   // Run the game at 10 ticks per second
   const tickTime = 1000 / 10;
   setInterval(() => {
     Matter.Engine.update(engine, tickTime);
     processUpdate(io, engine.world.bodies);
+    // console.log(engine.world.bodies.length)
   }, tickTime);
 }
 
