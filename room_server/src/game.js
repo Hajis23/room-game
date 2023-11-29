@@ -1,5 +1,6 @@
 const Matter = require('matter-js');
 const createCollisionObjects = require('./tiledMapParser');
+const { measureTime, timings, getAverageTime } = require('./utils');
 
 const players = {}
 
@@ -102,9 +103,16 @@ const startGame = (io) => {
   // Run the game at 20 ticks per second
   const tickTime = 1000 / 20;
   setInterval(() => {
-    Matter.Engine.update(engine, tickTime);
-    processUpdate(io, engine.world.bodies);
+    measureTime("tick", () => {
+      Matter.Engine.update(engine, tickTime);
+      processUpdate(io, engine.world.bodies);
+    });
   }, tickTime);
+
+  // Log the tick time every 10 seconds
+  setInterval(() => {
+    console.log("ticktime:", getAverageTime("tick", true), "ms")
+  }, 10_000)
 }
 
 module.exports = { startGame, createPlayer, removePlayer, setCurrentInput };
