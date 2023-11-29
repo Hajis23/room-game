@@ -3,6 +3,30 @@ import { sendInputMessage } from './socket';
 import Player from './Player';
 import Room from './Room';
 
+const players = {
+
+};
+
+const hideOldPlayers = () => {
+  const now = Date.now();
+  for (const id in players) {
+    const player = getPlayer(id);
+    if (player.lastUpdated < now - 1000) {
+      player.setVisible(false);
+      console.log("hiding player", id)
+    }
+  }
+}
+
+/**
+ * 
+ * @param {string} id 
+ * @returns {Player}
+ */
+export const getPlayer = (id) => {
+  return players[id];
+}
+
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super('main');
@@ -22,7 +46,10 @@ export default class MainScene extends Phaser.Scene {
     this.room = new Room(this);
 
     // Create the player
-    this.player = new Player(this, 300, 100, 'charactersheet', 0);
+    this.player = new Player(this, 300, 100, 'charactersheet', 0, "My player id");
+    players[this.player.id] = this.player;
+
+  
 
     // Init keyboard controls
     this.keys = this.input.keyboard.createCursorKeys();

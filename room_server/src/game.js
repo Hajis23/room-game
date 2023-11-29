@@ -11,7 +11,7 @@ const createPlayer = (id) => {
     0,
     50,
     50,
-    { isStatic: false }
+    { isStatic: false, label: id }
   );
 
   players[id] = player;
@@ -20,10 +20,6 @@ const createPlayer = (id) => {
 
 const removePlayer = (id) => {
   Matter.Composite.remove(engine.world, players[id])
-}
-
-const getPlayer = (id) => {
-  return players[id];
 }
 
 /**
@@ -41,6 +37,7 @@ const transformBodyToData = (body) => {
     velocity: body.velocity,
     angle: body.angle,
     angularVelocity: body.angularVelocity,
+    label: body.label,
   };
 }
 
@@ -56,7 +53,9 @@ const processUpdate = (io, bodies) => {
   // Process player input?
 
   // Send the bodies' data to the clients
-  io.emit("update", dynamicBodies.map(transformBodyToData));
+  io.emit("update", {
+    bodies: dynamicBodies.map(transformBodyToData),
+  });
 }
 
 /**
