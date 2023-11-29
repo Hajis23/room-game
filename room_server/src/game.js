@@ -7,10 +7,10 @@ const createPlayer = (id) => {
   console.log("creating player", id)
 
   const player = Matter.Bodies.rectangle(
-    0,
-    0,
-    50,
-    50,
+    300,
+    100,
+    20,
+    12,
     { isStatic: false, label: id }
   );
 
