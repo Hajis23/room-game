@@ -18,6 +18,10 @@ const createPlayer = (id) => {
   Matter.Composite.add(engine.world, player);
 }
 
+const setCurrentInput = (id, input) => {
+  players[id].currentInput = input;
+}
+
 const removePlayer = (id) => {
   Matter.Composite.remove(engine.world, players[id])
   delete players[id];
@@ -52,6 +56,22 @@ const processUpdate = (io, bodies) => {
   // Check if bodies are leaving the room?
 
   // Process player input?
+  Object.keys(players).forEach((id) => {
+    const player = players[id];
+    if (player.currentInput) {
+      const { up, down, left, right } = player.currentInput;
+
+      let x = 0;
+      let y = 0;
+
+      if (up) y -= 1;
+      if (down) y += 1;
+      if (left) x -= 1;
+      if (right) x += 1;
+
+      Matter.Body.setVelocity(player, { x, y });
+    }
+  })
 
   // Send the bodies' data to the clients
   io.emit("update", {
@@ -79,13 +99,12 @@ const startGame = (io) => {
   const ground = Matter.Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
   Matter.Composite.add(engine.world, ground);
 
-  // Run the game at 10 ticks per second
-  const tickTime = 1000 / 10;
+  // Run the game at 20 ticks per second
+  const tickTime = 1000 / 5;
   setInterval(() => {
     Matter.Engine.update(engine, tickTime);
     processUpdate(io, engine.world.bodies);
-    console.log(Object.values(players).length)
   }, tickTime);
 }
 
-module.exports = { startGame, createPlayer, removePlayer };
+module.exports = { startGame, createPlayer, removePlayer, setCurrentInput };

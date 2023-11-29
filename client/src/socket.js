@@ -10,6 +10,12 @@ const socket = io("localhost:3000", {
   }
 });
 
+const serverTickRate = 1000 / 20;
+
+const clientFrameRate = 1000 / 120;
+
+const multiplier = serverTickRate / clientFrameRate;
+
 socket.on("update", (data) => {
   const { bodies } = data
   for (const body of bodies) {
@@ -19,14 +25,15 @@ socket.on("update", (data) => {
     if (player) {
       console.log("updating player", body.label)
       player.setPosition(body.position.x, body.position.y);
-      player.setVelocity(body.velocity.x, body.velocity.y);
+      player.setVelocity(body.velocity.x * multiplier, body.velocity.y * multiplier);
+      console.log(player.body.velocity, body.velocity)
       player.setAngle(body.angle);
       player.setAngularVelocity(body.angularVelocity);
       player.lastUpdated = Date.now();
     }
   }
 
-  
+
 });
 
 export const sendInputMessage = async (input) => {

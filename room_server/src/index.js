@@ -63,6 +63,7 @@ client_io.on('connection', (socket) => {
   
   socket.on("input", (data) => {
     console.log("input:", data);
+    game.setCurrentInput(id, data);
   });
 
   socket.on("request_relocation", (data, respond) => {

@@ -15,14 +15,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Add physics
     scene.physics.add.existing(this);
 
-    // Set physics properties
-    this.setCollideWorldBounds(true);
-    this.setDrag(0.001);
-    this.setDamping(true);
-    this.setMaxVelocity(70);
     this.body.setSize(20, 12, false);
     this.body.setOffset(14, 40);
-    this.body.onCollide = true;
 
     // Create animations
     this.anims.create({
@@ -74,22 +68,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    this.setAcceleration(0);
+    // this.setAcceleration(0);
 
     if (keys.left.isDown) {
-      this.setAccelerationX(-400);
+      // this.setAccelerationX(-400);
       this.setFlipX(true);
       isRunning = true;
     } else if (keys.right.isDown) {
-      this.setAccelerationX(400);
+      // this.setAccelerationX(400);
       this.setFlipX(false);
       isRunning = true;
     }
     if (keys.up.isDown) {
-      this.setAccelerationY(-400);
+      // this.setAccelerationY(-400);
       isRunning = true;
     } else if (keys.down.isDown) {
-      this.setAccelerationY(400);
+      // this.setAccelerationY(400);
       isRunning = true;
     }
 

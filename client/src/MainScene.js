@@ -78,8 +78,7 @@ export default class MainScene extends Phaser.Scene {
     });
   }
 
-  update() {
-    this.physics.collide(this.player, this.room.collisionLayer);
+  update(time, deltaTime) {
     this.player.update(this.keys);
   }
 }
