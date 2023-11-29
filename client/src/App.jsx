@@ -4,8 +4,10 @@ import {useState} from 'react';
 
 const App = () => {
   const [authenticated, setAuthenticated] = useState(false);
-  function login() {
+
+  function login(username) {
     setAuthenticated(true);
+    alert(username)
   }
 
   function logout() {
@@ -33,11 +35,18 @@ const App = () => {
 }
 
 function Login({login}) {
+  const [username, setUsername] = useState("");
+
+  function handleChange(event) {
+    setUsername(event.target.value)
+    
+  }  
   return (
     <div>
-      <input>
+      <input value={username} onChange={handleChange}>
+        
       </input>
-      <button onClick={login}>Login</button>
+      <button onClick={() => login(username)}>Login</button>
     </div>    
   )
 }
