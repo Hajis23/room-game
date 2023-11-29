@@ -1,5 +1,3 @@
-import Phaser from 'phaser';
-
 export default class Room {
   constructor(scene) {
     // create the Tilemap (key matches the asset key from the loader)
@@ -14,14 +12,8 @@ export default class Room {
     // Create the base layer (floor and walls etc)
     this.collisionLayer = map.createLayer('Base', tileset);
 
-    // Render collision boxes
-    this.collisionLayer.renderDebug(scene.add.graphics(), {
-      tileColor: null,
-      collidingTileColor: new Phaser.Display.Color(243, 134, 48, 200),
-      faceColor: new Phaser.Display.Color(40, 39, 37, 255),
-    });
-
-    // Another purely visual layer
     map.createLayer('Decoration', tileset);
+
+    map.createLayer('Shade', tileset);
   }
 }

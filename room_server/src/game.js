@@ -100,7 +100,7 @@ const startGame = (io) => {
   Matter.Composite.add(engine.world, ground);
 
   // Run the game at 20 ticks per second
-  const tickTime = 1000 / 5;
+  const tickTime = 1000 / 20;
   setInterval(() => {
     Matter.Engine.update(engine, tickTime);
     processUpdate(io, engine.world.bodies);
