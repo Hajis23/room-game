@@ -20,6 +20,7 @@ const createPlayer = (id) => {
 
 const removePlayer = (id) => {
   Matter.Composite.remove(engine.world, players[id])
+  delete players[id];
 }
 
 /**
@@ -83,7 +84,7 @@ const startGame = (io) => {
   setInterval(() => {
     Matter.Engine.update(engine, tickTime);
     processUpdate(io, engine.world.bodies);
-    // console.log(engine.world.bodies.length)
+    console.log(Object.values(players).length)
   }, tickTime);
 }
 
