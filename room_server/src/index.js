@@ -72,6 +72,7 @@ client_io.on('connection', (socket) => {
 
   socket.on("disconnect", () => {
     console.log("client disconnectedasd", socket.id);
+    game.removePlayer(id);
   })
 });
 

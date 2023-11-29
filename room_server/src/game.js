@@ -18,6 +18,10 @@ const createPlayer = (id) => {
   Matter.Composite.add(engine.world, player);
 }
 
+const removePlayer = (id) => {
+  Matter.Composite.remove(engine.world, players[id])
+}
+
 const getPlayer = (id) => {
   return players[id];
 }
@@ -84,4 +88,4 @@ const startGame = (io) => {
   }, tickTime);
 }
 
-module.exports = { startGame, createPlayer };
+module.exports = { startGame, createPlayer, removePlayer };
