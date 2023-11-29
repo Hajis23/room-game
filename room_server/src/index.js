@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const { io } = require("socket.io-client"); 
-const startGame = require('./src/game');
+const startGame = require('./game');
 
 // A simple http server to ping:
 const http = require('http');
