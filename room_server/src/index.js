@@ -1,6 +1,6 @@
 const { Server } = require('socket.io');
 const { io } = require("socket.io-client"); 
-const startGame = require('./game');
+const game = require('./game');
 
 // A simple http server to ping:
 const http = require('http');
@@ -44,6 +44,11 @@ function moveData(data){
 
 // Connections from clients
 client_io.on('connection', (socket) => {
+
+  const auth = socket.handshake.auth;
+  const id = auth.id;
+  game.createPlayer(id);
+
   console.log('a user connected', socket.id);
 
   socket.on("modify_state", (data) => {
@@ -100,6 +105,6 @@ setInterval(() => client_io.emit("updated_state", getCombinedState()), 1000);
 
 
 // Start the game
-startGame(client_io);
+game.startGame(client_io);
 
 console.log(`Server ${NAME} listening on port ${process.env.SERVER_PORT} and ${process.env.CLIENT_PORT}`)

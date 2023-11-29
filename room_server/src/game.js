@@ -1,6 +1,27 @@
 const Matter = require('matter-js');
 const createCollisionObjects = require('./tiledMapParser');
 
+const players = {}
+
+const createPlayer = (id) => {
+  console.log("creating player", id)
+
+  const player = Matter.Bodies.rectangle(
+    0,
+    0,
+    50,
+    50,
+    { isStatic: false, type: "player" }
+  );
+
+  players[id] = player;
+  Matter.Composite.add(engine.world, player);
+}
+
+const getPlayer = (id) => {
+  return players[id];
+}
+
 /**
  * @type {Matter.Engine} The global engine object
  */
@@ -55,4 +76,4 @@ const startGame = (io) => {
   }, tickTime);
 }
 
-module.exports = startGame;
+module.exports = { startGame, createPlayer };
