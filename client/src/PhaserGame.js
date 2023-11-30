@@ -1,8 +1,9 @@
 import Phaser from 'phaser';
 
 import MainScene from './MainScene';
+import LoginScene from './LoginScene';
 
-export default new Phaser.Game({
+let game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'phaser-container',
   scale: {
@@ -18,5 +19,15 @@ export default new Phaser.Game({
       debug: true,
     },
   },
-  scene: [MainScene],
+  scene: [LoginScene, MainScene],
 });
+export default game;
+
+
+export const startGame = () => {
+  game.scene.switch("login", "main");
+}
+
+export const stopGame = () => {
+  game.scene.switch("main", "login");
+}

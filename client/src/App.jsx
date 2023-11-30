@@ -1,5 +1,6 @@
 import './PhaserGame'
 import './App.css'
+import { startGame, stopGame } from './PhaserGame';
 import {useState} from 'react';
 
 const App = () => {
@@ -7,11 +8,13 @@ const App = () => {
 
   function login(username) {
     setAuthenticated(true);
+    startGame();
     alert(username)
   }
 
   function logout() {
     setAuthenticated(false);
+    stopGame();
   }
 
   if (authenticated) {
