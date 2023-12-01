@@ -61,21 +61,18 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    // this.setAcceleration(0);
-    if (this.body.velocity.x < 0) {
-      // this.setAccelerationX(-400);
+    const EPSILON = 0.1;
+
+    if (this.body.velocity.x < -EPSILON) {
       this.setFlipX(true);
       isRunning = true;
-    } else if (this.body.velocity.x > 0) {
-      // this.setAccelerationX(400);
+    } else if (this.body.velocity.x > EPSILON) {
       this.setFlipX(false);
       isRunning = true;
     }
-    if (this.body.velocity.y > 0) {
-      // this.setAccelerationY(-400);
+    if (this.body.velocity.y < -EPSILON) {
       isRunning = true;
-    } else if (this.body.velocity.y < 0) {
-      // this.setAccelerationY(400);
+    } else if (this.body.velocity.y > EPSILON) {
       isRunning = true;
     }
 
