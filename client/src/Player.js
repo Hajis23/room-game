@@ -51,7 +51,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.anims.play('idle');
   }
 
-  update(keys) {
+  update() {
     if (this.isDead) return;
 
     let isRunning = false;
@@ -61,35 +61,25 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    // Trigger death from shift key
-    if (keys.shift.isDown) {
-      this.isDead = true;
-      this.anims.play('death', true);
-      return;
-    }
-
     // this.setAcceleration(0);
-
-    if (keys.left.isDown) {
+    if (this.body.velocity.x < 0) {
       // this.setAccelerationX(-400);
       this.setFlipX(true);
       isRunning = true;
-    } else if (keys.right.isDown) {
+    } else if (this.body.velocity.x > 0) {
       // this.setAccelerationX(400);
       this.setFlipX(false);
       isRunning = true;
     }
-    if (keys.up.isDown) {
+    if (this.body.velocity.y > 0) {
       // this.setAccelerationY(-400);
       isRunning = true;
-    } else if (keys.down.isDown) {
+    } else if (this.body.velocity.y < 0) {
       // this.setAccelerationY(400);
       isRunning = true;
     }
 
-    if (keys.space.isDown && this.body.velocity.length() > 10) {
-      this.anims.play('roll', true);
-    } else if (isRunning) {
+    if (isRunning) {
       this.anims.play('walk', true);
     } else {
       this.anims.play('idle', true);

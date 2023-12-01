@@ -98,7 +98,10 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update(time, deltaTime) {
-    this.player.update(this.keys);
+    for (const id in players) {
+      const player = getPlayer(id);
+      player.update();
+    }
   }
 
   handleRoomUpdate(data){
