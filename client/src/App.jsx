@@ -8,7 +8,7 @@ const App = () => {
 
   function login(username) {
     setAuthenticated(true);
-    startGame();
+    startGame(username);
     alert(username)
   }
 

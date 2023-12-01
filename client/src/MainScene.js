@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { sendInputMessage } from './socket';
+import { sendInputMessage, getClientUserId } from './socket';
 import Player from './Player';
 import Room from './Room';
 
@@ -46,7 +46,8 @@ export default class MainScene extends Phaser.Scene {
     this.room = new Room(this);
 
     // Create the player
-    this.player = new Player(this, 300, 100, 'charactersheet', 0, "My player id");
+    const userId = getClientUserId();
+    this.player = new Player(this, 300, 100, 'charactersheet', 0, userId);
     players[this.player.id] = this.player;
 
   
