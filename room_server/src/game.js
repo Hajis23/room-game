@@ -54,6 +54,11 @@ const transformBodyToData = (body) => {
 const processUpdate = (io, bodies) => {
   const dynamicBodies = bodies.filter((body) => !body.isStatic)
 
+  // Do not allow angular rotation
+  dynamicBodies.forEach((body) => {
+    Matter.Body.setAngularVelocity(body, 0);
+  })
+
   // Check if bodies are leaving the room?
 
   // Process player input?
