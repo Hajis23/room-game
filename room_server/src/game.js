@@ -2,6 +2,9 @@ const Matter = require('matter-js');
 const createCollisionObjects = require('./tiledMapParser');
 const { measureTime, timings, getAverageTime } = require('./utils');
 
+/**
+ * @type {{ [id: string]: Matter.Body }}
+ */
 const players = {}
 
 const createPlayer = (id) => {
@@ -12,7 +15,7 @@ const createPlayer = (id) => {
     100,
     20,
     12,
-    { isStatic: false, label: id }
+    { isStatic: false, label: id, frictionAir: 0.2, frictionStatic: 0.5, friction: 0.1, mass: 100 }
   );
 
   players[id] = player;
@@ -61,21 +64,20 @@ const processUpdate = (io, bodies) => {
 
   // Check if bodies are leaving the room?
 
-  // Process player input?
-  Object.keys(players).forEach((id) => {
-    const player = players[id];
+  // Process player input
+  Object.values(players).forEach(player => {
     if (player.currentInput) {
       const { up, down, left, right } = player.currentInput;
 
       let x = 0;
       let y = 0;
 
-      if (up) y -= 1;
-      if (down) y += 1;
-      if (left) x -= 1;
-      if (right) x += 1;
-
-      Matter.Body.setVelocity(player, { x, y });
+      if (up) y -= 0.1;
+      if (down) y += 0.1;
+      if (left) x -= 0.1;
+      if (right) x += 0.1;
+  
+      Matter.Body.applyForce(player, player.position, { x, y });
     }
   })
 
