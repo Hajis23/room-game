@@ -17,24 +17,21 @@ const App = () => {
     stopGame();
   }
 
-  if (authenticated) {
-    return (
-      <div>
-        <div id="phaser-container"></div>
-        <div id="ui-container">
-          <h1>Room game</h1>
-          <button onClick={logout}>
-            Logout
-          </button>  
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <Login login={login}>
-    </Login>
-  )
+    <div>
+      <div id="phaser-container"></div>
+      <div id="ui-container">
+        <h1>Room game</h1>
+        {authenticated ? (
+        <button onClick={logout}>
+          Logout
+        </button>
+        ) : (
+          <Login login={login}/>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function Login({login}) {
