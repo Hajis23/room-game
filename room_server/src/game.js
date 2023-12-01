@@ -23,6 +23,8 @@ const createPlayer = (id) => {
 }
 
 const setCurrentInput = (id, input) => {
+  if (!players[id]) return;
+
   players[id].currentInput = input;
   if (Object.values(input).some((v) => v)) {
     players[id].animationState = "walk";

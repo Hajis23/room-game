@@ -12,6 +12,17 @@ const hashString = (str) => {
 }
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
+
+  /**
+   * 
+   * @param {Phaser.Scene} scene 
+   * @param {*} x 
+   * @param {*} y 
+   * @param {*} texture 
+   * @param {*} frame 
+   * @param {*} id 
+   * @param {*} isClientPlayer 
+   */
   constructor(scene, x, y, texture, frame, id, isClientPlayer = false) {
     super(scene, x, y, texture, frame);
     this.scale = 0.5;
@@ -28,6 +39,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Add physics
     scene.physics.add.existing(this);
+
+    const nameText = scene.add.text(0, 0, id, { fontSize: '14px', fill: '#fff' }).setOrigin(0.5, 0.5).setPosition(this.x, this.y - 15);
+    nameText.scale = 0.2;
+    this.nameText = nameText;
 
     this.body.setSize(20, 12, false);
     this.body.setOffset(14, 40);
@@ -70,6 +85,13 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
+    // Make text follow player
+    this.nameText.setPosition(this.x, this.y - 15);
+    // Player draw order based on y position
+    this.depth = this.y;
+    // Draw text above player
+    this.nameText.depth = this.depth + 1;
+  
     if (this.isDead) return;
 
     let isRunning = this.animationState === 'walk' || Object.values(this.clientInput).some((v) => v);
