@@ -1,13 +1,27 @@
 import Phaser from 'phaser';
 
+const hashString = (str) => {
+  let hash = 0;
+  if (str.length === 0) return hash;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash;
+}
+
 export default class Player extends Phaser.Physics.Arcade.Sprite {
-  constructor(scene, x, y, texture, frame, id) {
+  constructor(scene, x, y, texture, frame, id, isClientPlayer = false) {
     super(scene, x, y, texture, frame);
     this.scale = 0.5;
 
     this.id = id;
-
     this.lastUpdated = Date.now();
+    this.animationState = 'idle';
+    this.clientInput = {};
+    this.flipX = false;
+    this.isClientPlayer = isClientPlayer;
 
     // Add the player to the scene
     scene.add.existing(this);
@@ -52,32 +66,23 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Give player random color tint
     const max = 0xFFFFFF;
-    this.tint = Math.floor(Math.random() * (max / 2)) + (max / 2);
+    this.tint = hashString(id) % max;
   }
 
   update() {
     if (this.isDead) return;
 
-    let isRunning = false;
+    let isRunning = this.animationState === 'walk' || Object.values(this.clientInput).some((v) => v);
 
     const isRolling = this.anims.currentAnim.key === 'roll' && !this.anims.currentFrame.isLast;
     if (isRolling) { // Keep rolling until anim ends...
       return;
     }
 
-    const EPSILON = 0.1;
-
-    if (this.body.velocity.x < -EPSILON) {
+    if (this.clientInput.left) {
       this.setFlipX(true);
-      isRunning = true;
-    } else if (this.body.velocity.x > EPSILON) {
+    } else if (this.clientInput.right) {
       this.setFlipX(false);
-      isRunning = true;
-    }
-    if (this.body.velocity.y < -EPSILON) {
-      isRunning = true;
-    } else if (this.body.velocity.y > EPSILON) {
-      isRunning = true;
     }
 
     if (isRunning) {

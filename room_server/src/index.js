@@ -62,8 +62,9 @@ client_io.on('connection', (socket) => {
   });
   
   socket.on("input", (data) => {
-    console.log("input:", data);
-    game.setCurrentInput(id, data);
+    setTimeout(() => { // Simulate latency
+      game.setCurrentInput(id, data);
+    }, 100)
   });
 
   socket.on("request_relocation", (data, respond) => {

@@ -25,12 +25,10 @@ const hideOldPlayers = () => {
 
 
 const updatePlayer = (player, body) => {
-  console.log("updating player", body.label)
   player.setPosition(body.position.x, body.position.y);
   player.setVelocity(body.velocity.x * multiplier, body.velocity.y * multiplier);
-  console.log(player.body.velocity, body.velocity)
-  player.setAngle(body.angle);
-  player.setAngularVelocity(body.angularVelocity);
+  player.animationState = body.animationState;
+  if (!player.isClientPlayer) player.flipX = body.flipX;
   player.lastUpdated = Date.now();
 }
 
@@ -64,7 +62,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Create the player
     const userId = getClientUserId();
-    this.player = new Player(this, 300, 100, 'charactersheet', 0, userId);
+    this.player = new Player(this, 300, 100, 'charactersheet', 0, userId, true);
     players[this.player.id] = this.player;
 
     // Set event handlers
@@ -81,13 +79,7 @@ export default class MainScene extends Phaser.Scene {
     // Send input messages to server every 100ms. Save the timer so we can for example cancel it later.
     this.inputInterval = this.time.addEvent({
       callback: () => {
-        const input = {
-          left: this.keys.left.isDown,
-          right: this.keys.right.isDown,
-          up: this.keys.up.isDown,
-          down: this.keys.down.isDown,
-          space: this.keys.space.isDown,
-        };
+        const input = this.getClientInput()
         // We could optimize this in many ways, for example not sending message if input is same as last time
         sendInputMessage(input);
       },
@@ -98,6 +90,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update(time, deltaTime) {
+    this.player.clientInput = this.getClientInput()
     for (const id in players) {
       const player = getPlayer(id);
       player.update();
@@ -107,7 +100,6 @@ export default class MainScene extends Phaser.Scene {
   handleRoomUpdate(data){
     const { bodies } = data
     for (const body of bodies) {
-      console.log("updating body", body.label)
       let player = getPlayer(body.label);  
       if (!player) {
         player = new Player(this, 300, 100, 'charactersheet', 0, body.label);
@@ -117,5 +109,15 @@ export default class MainScene extends Phaser.Scene {
     }
   
     hideOldPlayers();
+  }
+
+  getClientInput() {
+    const input = {
+      up: this.keys.up.isDown,
+      down: this.keys.down.isDown,
+      left: this.keys.left.isDown,
+      right: this.keys.right.isDown,
+    }
+    return input;
   }
 }

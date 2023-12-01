@@ -24,6 +24,16 @@ const createPlayer = (id) => {
 
 const setCurrentInput = (id, input) => {
   players[id].currentInput = input;
+  if (Object.values(input).some((v) => v)) {
+    players[id].animationState = "walk";
+    if (input.left) {
+      players[id].flipX = true;
+    } else if (input.right) {
+      players[id].flipX = false;
+    }
+  } else {
+    players[id].animationState = "idle";
+  }
 }
 
 const removePlayer = (id) => {
@@ -44,9 +54,9 @@ const transformBodyToData = (body) => {
   return {
     position: body.position,
     velocity: body.velocity,
-    angle: body.angle,
-    angularVelocity: body.angularVelocity,
     label: body.label,
+    animationState: body.animationState,
+    flipX: body.flipX,
   };
 }
 
