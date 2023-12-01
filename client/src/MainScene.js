@@ -3,6 +3,10 @@ import { sendInputMessage, getClientUserId } from './socket';
 import Player from './Player';
 import Room from './Room';
 
+const serverTickRate = 1000 / 20;
+const clientFrameRate = 1000 / 120;
+const multiplier = serverTickRate / clientFrameRate;
+
 const players = {
 
 };
@@ -12,11 +16,24 @@ const hideOldPlayers = () => {
   for (const id in players) {
     const player = getPlayer(id);
     if (player.lastUpdated < now - 1000) {
-      player.setVisible(false);
+      player.destroy();
+      delete players[id];
       console.log("hiding player", id)
     }
   }
 }
+
+
+const updatePlayer = (player, body) => {
+  console.log("updating player", body.label)
+  player.setPosition(body.position.x, body.position.y);
+  player.setVelocity(body.velocity.x * multiplier, body.velocity.y * multiplier);
+  console.log(player.body.velocity, body.velocity)
+  player.setAngle(body.angle);
+  player.setAngularVelocity(body.angularVelocity);
+  player.lastUpdated = Date.now();
+}
+
 
 /**
  * 
@@ -50,7 +67,8 @@ export default class MainScene extends Phaser.Scene {
     this.player = new Player(this, 300, 100, 'charactersheet', 0, userId);
     players[this.player.id] = this.player;
 
-  
+    // Set event handlers
+    this.sys.game.events.on('room_update', this.handleRoomUpdate, this);
 
     // Init keyboard controls
     this.keys = this.input.keyboard.createCursorKeys();
@@ -81,5 +99,20 @@ export default class MainScene extends Phaser.Scene {
 
   update(time, deltaTime) {
     this.player.update(this.keys);
+  }
+
+  handleRoomUpdate(data){
+    const { bodies } = data
+    for (const body of bodies) {
+      console.log("updating body", body.label)
+      let player = getPlayer(body.label);  
+      if (!player) {
+        player = new Player(this, 300, 100, 'charactersheet', 0, body.label);
+        players[player.id] = player; 
+      }
+      updatePlayer(player, body);
+    }
+  
+    hideOldPlayers();
   }
 }

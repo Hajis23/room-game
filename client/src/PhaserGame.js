@@ -34,3 +34,7 @@ export const stopGame = () => {
   game.scene.switch("main", "login");
   disconnectRoomServer();
 }
+
+export const emitGameEvent = (event, payload) => {
+  game.events.emit(event, payload);
+}
