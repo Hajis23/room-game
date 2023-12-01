@@ -49,6 +49,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Set idle animation
     this.anims.play('idle');
+
+    // Give player random color tint
+    const max = 0xFFFFFF;
+    this.tint = Math.floor(Math.random() * (max / 2)) + (max / 2);
   }
 
   update() {
