@@ -9,7 +9,6 @@ const App = () => {
   function login(username) {
     setAuthenticated(true);
     startGame(username);
-    alert(username)
   }
 
   function logout() {
@@ -42,12 +41,10 @@ function Login({login}) {
     
   }  
   return (
-    <div>
-      <input value={username} onChange={handleChange}>
-        
-      </input>
+    <form onSubmit={e => e.preventDefault()}>
+      <input value={username} onChange={handleChange} autoFocus placeholder='Your player name'/>
       <button onClick={() => login(username)}>Login</button>
-    </div>    
+    </form>    
   )
 }
 
