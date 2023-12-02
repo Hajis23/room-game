@@ -1,46 +1,42 @@
 const { Server } = require('socket.io');
-const { io } = require("socket.io-client"); 
+const { io: socketClient, Socket } = require("socket.io-client"); 
 const game = require('./game');
 
 // A simple http server to ping:
 const http = require('http');
-const server = http.createServer((req, res) => {
-  console.log("pinged")
+const clientServer = http.createServer((req, res) => {
+  console.log("client server pinged")
   res.writeHead(200);
   res.end('ok');
 });
+clientServer.listen(process.env.CLIENT_PORT);
 
-server.listen(process.env.CLIENT_PORT);
+const serverServer = http.createServer((req, res) => {
+  console.log("server server pinged")
+  res.writeHead(200);
+  res.end('ok');
+})
+serverServer.listen(process.env.SERVER_PORT);
 
 const NAME = process.env.NAME;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 
-const server_io = new Server(process.env.SERVER_PORT);
-const client_io = new Server(server, {
+/**
+ * @type {Socket[]}
+ */
+const serverSockets = neighbourList.map(address => socketClient(address));
+
+const server_io = new Server(serverServer, {
   cors: {
     origin: '*',
   },
 });
 
-let localState = [NAME];
-let neighbourStates = {};
-let serverSockets = neighbourList.map(name => io(`ws://${name}`));
-
-function getCombinedState(){
-  const snapshot = Object.keys(neighbourStates).map(name => neighbourStates[name]);
-  return [...localState, ...snapshot];
-}
-
-function removeFromState(data){
-  localState = localState.filter(x => x !== data);
-}
-
-function moveData(data){
-  const serverId = Math.floor(Math.random()*neighbourList.length);
-  serverSockets[serverId].emit("take_state", NAME, data);
-  removeFromState(data);
-  return neighbourList[serverId];
-}
+const client_io = new Server(clientServer, {
+  cors: {
+    origin: '*',
+  },
+});
 
 // Connections from clients
 client_io.on('connection', (socket) => {
@@ -50,31 +46,16 @@ client_io.on('connection', (socket) => {
   game.createPlayer(id);
 
   console.log('a user connected', socket.id);
-
-  socket.on("modify_state", (data) => {
-    localState = [...localState, data]
-    console.log("modified state:", localState);
-  });
-
-  socket.on("delete_state", (data) => {
-    removeFromState(data);
-    console.log("modified state:", localState);
-  });
   
   socket.on("input", (data) => {
     setTimeout(() => { // Simulate latency
-      game.setCurrentInput(id, data);
+      game.setCurrentPlayerInput(id, data);
     }, 100)
   });
 
-  socket.on("request_relocation", (data, respond) => {
-    if(localState.includes(data))
-      respond(moveData(data));
-  });
-
-  socket.on("disconnect", () => {
-    console.log("client disconnectedasd", socket.id);
-    game.removePlayer(id);
+  socket.on("disconnect", (reason) => {
+    console.log("client disconnected", socket.id, reason);
+    game.removePrimaryObject(id);
   })
 });
 
@@ -83,31 +64,26 @@ client_io.on('connection', (socket) => {
 server_io.on('connection', (socket) => {
   console.log('a server connected', socket.id);
 
-  socket.on('share_local', (name, local) => {
-    neighbourStates[name] = local;
-    // console.log(name,"shared local:", local)
-  });
+  socket.on("update", (payload) => {
+    game.updateReplicas(payload)
+  })
 
-  socket.on('take_state', (name, state) => {
-    localState = [...localState, state];
-    console.log("received",state,"from",name);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("server disconnected", socket.id);
+  socket.on("disconnect", (reason) => {
+    console.log("server disconnected", socket.id, reason);
   })
 });
 
-
-
-// Periodically share local state with other servers
-setInterval(() => serverSockets.forEach(s => s.emit("share_local", NAME, localState)), 1000);
-
-// Broadcast state to all clients
-setInterval(() => client_io.emit("updated_state", getCombinedState()), 1000);
-
-
 // Start the game
-game.startGame(client_io);
+game.startGame(client_io, serverSockets);
 
-console.log(`Server ${NAME} listening on port ${process.env.SERVER_PORT} and ${process.env.CLIENT_PORT}`)
+console.log(`${NAME}, SERVER_PORT = ${process.env.SERVER_PORT}, CLIENT_PORT = ${process.env.CLIENT_PORT}`)
+
+// Ping neighbours after 1 second
+setTimeout(() => neighbourList.map(async (address) => {
+  try {
+    const res = await fetch(address)
+    console.log("neighbour", address, await res.text())
+  } catch (e) {
+    console.error("neighbour", address, e)
+  }
+}), 1000)

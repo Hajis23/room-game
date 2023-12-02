@@ -13,8 +13,10 @@ services:
     env_file: ./env/server1
     expose:
       - 3000
+      - 3001
     ports:
       - 3000:3000
+      - 3001:3001
 
   server2:
     build:
@@ -27,8 +29,10 @@ services:
     env_file: ./env/server2
     expose:
       - 4000
+      - 4001
     ports:
       - 4000:4000
+      - 4001:4001
 
   server3:
     build:
@@ -41,5 +45,7 @@ services:
     env_file: ./env/server3
     expose:
       - 5000
+      - 5001
     ports:
       - 5005:5000
+      - 5001:5001

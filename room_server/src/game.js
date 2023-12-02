@@ -1,11 +1,29 @@
 const Matter = require('matter-js');
 const { measureTime, getAverageTime, ROOM_ID } = require('./utils');
 const loadTiledMap = require('./tiledMapParser');
+const { Socket } = require('socket.io-client')
+
+/**
+ * (Someone can expand this typedef but id is enough for now.)
+ * @typedef {{ id: string }} SerializedObject
+ */
 
 /**
  * @type {{ [id: string]: Matter.Body }}
  */
-const players = {}
+const primaryObjects = {}
+
+const replicatedObjects = {};
+
+/**
+ * 
+ * @param {{ timestamp: number, bodies: SerializedObject[] }} payload 
+ */
+const updateReplicas = (payload) => {
+  payload.bodies.forEach((replicaData) => {
+    replicatedObjects[replicaData.id] = replicaData
+  })
+}
 
 const createPlayer = (id) => {
   console.log("creating player", id)
@@ -18,29 +36,34 @@ const createPlayer = (id) => {
     { isStatic: false, label: id, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100 }
   );
 
-  players[id] = player;
+  // Always attach an id to primary objects
+  player.id = id;
+
+  primaryObjects[id] = player;
   Matter.Composite.add(engine.world, player);
 }
 
-const setCurrentInput = (id, input) => {
-  if (!players[id]) return;
+const setCurrentPlayerInput = (id, input) => {
+  if (!primaryObjects[id]) return;
 
-  players[id].currentInput = input;
+  primaryObjects[id].currentInput = input;
   if (Object.values(input).some((v) => v)) {
-    players[id].animationState = "walk";
+    primaryObjects[id].animationState = "walk";
     if (input.left) {
-      players[id].flipX = true;
+      primaryObjects[id].flipX = true;
     } else if (input.right) {
-      players[id].flipX = false;
+      primaryObjects[id].flipX = false;
     }
   } else {
-    players[id].animationState = "idle";
+    primaryObjects[id].animationState = "idle";
   }
 }
 
-const updatePlayer = (player) => {
-  if (player.currentInput) {
-    const { up, down, left, right } = player.currentInput;
+const updatePrimaryObjects = (body) => {
+  Matter.Body.setAngularVelocity(body, 0);
+
+  if (body.currentInput) {
+    const { up, down, left, right } = body.currentInput;
 
     let x = 0;
     let y = 0;
@@ -50,13 +73,13 @@ const updatePlayer = (player) => {
     if (left) x -= 0.1;
     if (right) x += 0.1;
 
-    Matter.Body.applyForce(player, player.position, { x, y });
+    Matter.Body.applyForce(body, body.position, { x, y });
   }
 }
 
-const removePlayer = (id) => {
-  Matter.Composite.remove(engine.world, players[id])
-  delete players[id];
+const removePrimaryObject = (id) => {
+  Matter.Composite.remove(engine.world, primaryObjects[id])
+  delete primaryObjects[id];
 }
 
 /**
@@ -67,48 +90,58 @@ let engine = null;
 /**
  * Send the body's relevant fields to the client
  * @param {Matter.Body} body 
+ * @returns {SerializedObject}
  */
-const transformBodyToData = (body) => {
+const transformPrimaryBodyToData = (body) => {
   return {
     position: body.position,
     velocity: body.velocity,
     label: body.label,
     animationState: body.animationState,
     flipX: body.flipX,
+    id: body.id,
   };
 }
 
 /**
- * @param {SocketIO} io
- * @param {Matter.Body[]} bodies 
+ * @param {Socket} clientIO
+ * @param {Socket[]} serverSockets
  */
-const processUpdate = (io, bodies) => {
-  const dynamicBodies = bodies.filter((body) => !body.isStatic)
-
-  // Do not allow angular rotation
-  dynamicBodies.forEach((body) => {
-    Matter.Body.setAngularVelocity(body, 0);
-  })
-
+const processUpdate = (clientIO, serverSockets) => {
   // Check if bodies are leaving the room?
 
-  // Process player input
-  Object.values(players).forEach(updatePlayer)
+  const primaries = Object.values(primaryObjects)
 
-  const serializedBodies = dynamicBodies.map(transformBodyToData);
-  const payload = {
-    bodies: serializedBodies,
+  primaries.forEach(updatePrimaryObjects)
+
+  const serializedPrimaries = primaries.map(transformPrimaryBodyToData);
+  
+  const replicas = Object.values(replicatedObjects)
+
+  // Send information about all objects to client
+  const clientPayload = {
+    bodies: serializedPrimaries.concat(replicas),
     timestamp: Date.now(),
   }
 
-  // Send the bodies' data to the clients
-  io.emit("update", payload);
+  // Send information only about primaries to neighbouring servers
+  const serverPayload = {
+    bodies: serializedPrimaries,
+    timestamp: Date.now(),
+  }
+
+  clientIO.emit("update", clientPayload);
+  serverSockets.forEach(socket => {
+    // console.log("sending payload to ", socket.)
+    socket.emit("update", serverPayload)
+  })
 }
 
 /**
- * @param {SocketIO} io
+ * @param {Socket} clientIO
+ * @param {Socket[]} serverSockets
  */
-const startGame = (io) => {
+const startGame = (clientIO, serverSockets) => {
   engine = Matter.Engine.create({
     gravity: {
       x: 0,
@@ -142,14 +175,14 @@ const startGame = (io) => {
   setInterval(() => {
     measureTime("tick", () => {
       Matter.Engine.update(engine, tickTime);
-      processUpdate(io, engine.world.bodies);
+      processUpdate(clientIO, serverSockets);
     });
   }, tickTime);
 
   // Log the tick time every 10 seconds
-  setInterval(() => {
-    console.log("ticktime:", getAverageTime("tick", true), "ms")
-  }, 10_000)
+  // setInterval(() => {
+  //   console.log("ticktime:", getAverageTime("tick", true), "ms")
+  // }, 10_000)
 }
 
-module.exports = { startGame, createPlayer, removePlayer, setCurrentInput };
+module.exports = { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas };
