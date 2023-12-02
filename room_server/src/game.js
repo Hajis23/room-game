@@ -1,6 +1,6 @@
 const Matter = require('matter-js');
-const createCollisionObjects = require('./tiledMapParser');
 const { measureTime, timings, getAverageTime } = require('./utils');
+const loadTiledMap = require('./tiledMapParser');
 
 /**
  * @type {{ [id: string]: Matter.Body }}
@@ -110,8 +110,7 @@ const startGame = (io) => {
     },
   });
 
-  const objects = createCollisionObjects();
-  console.log(objects)
+  const objects = loadTiledMap();
   objects.forEach((object) => {
     Matter.Composite.add(engine.world, object);
   });

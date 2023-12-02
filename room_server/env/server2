@@ -1,5 +1,6 @@
 CLIENT_PORT=4000
 SERVER_PORT=4001
 NAME=server2
+ROOM_ID=room2
 VITE_ADDRESS=http://localhost:8000
 OTHER_SERVERS=["localhost:3001", "localhost:5001"]
