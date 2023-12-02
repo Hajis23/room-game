@@ -1,5 +1,5 @@
 const Matter = require('matter-js');
-const { measureTime, timings, getAverageTime } = require('./utils');
+const { measureTime, getAverageTime, ROOM_ID } = require('./utils');
 const loadTiledMap = require('./tiledMapParser');
 
 /**
@@ -110,13 +110,26 @@ const startGame = (io) => {
     },
   });
 
-  const objects = loadTiledMap();
+  const { objects, roomObjects } = loadTiledMap();
   objects.forEach((object) => {
     Matter.Composite.add(engine.world, object);
   });
+  roomObjects.forEach((object) => {
+    Matter.Composite.add(engine.world, object);
+  });
 
-  const ground = Matter.Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-  Matter.Composite.add(engine.world, ground);
+  Matter.Events.on(engine, 'collisionStart', (event) => {
+    const pairs = event.pairs;
+    // Is one of the bodies neighbouring room?
+    pairs.forEach((pair) => {
+      const { bodyA, bodyB } = pair;
+      if (bodyA.label.startsWith("room") && bodyA.label !== ROOM_ID) {
+        console.log("player entered", bodyA.label);
+      } else if (bodyB.label.startsWith("room") && bodyB.label !== ROOM_ID) {
+        console.log("player entered", bodyB.label);
+      }
+    });
+  });
 
   // Run the game at 20 ticks per second
   const tickTime = 1000 / 20;

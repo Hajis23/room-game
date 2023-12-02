@@ -38,4 +38,6 @@ const getAverageTime = (name, reset = false) => {
   return avg;
 }
 
-module.exports = { measureTime, getAverageTime };
+const ROOM_ID = process.env.ROOM_ID;
+
+module.exports = { measureTime, getAverageTime, ROOM_ID };
