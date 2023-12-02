@@ -6,9 +6,9 @@ import {useState} from 'react';
 const App = () => {
   const [authenticated, setAuthenticated] = useState(false);
 
-  function login(username) {
+  function login(address, username) {
     setAuthenticated(true);
-    startGame(username);
+    startGame(address, username);
   }
 
   function logout() {
@@ -35,16 +35,30 @@ const App = () => {
 
 function Login({login}) {
   const [username, setUsername] = useState("");
+  const addresses = ["localhost:3000", "localhost:4000", "localhost:5000"]
+  const [serverAddress, setServerAddress] = useState(addresses[0]);
 
   function handleChange(event) {
     setUsername(event.target.value)
-    
-  }  
+  }
+
   return (
-    <form onSubmit={e => e.preventDefault()}>
-      <input value={username} onChange={handleChange} autoFocus placeholder='Your player name'/>
-      <button onClick={() => login(username)}>Login</button>
-    </form>    
+    <div>
+      <p>Select a server</p>
+      <div>
+        {addresses.map(a => (
+          <p key={a}>
+            <input id={a} type="radio" name="address" value={a} onChange={(e) => setServerAddress(e.target.value)} checked={serverAddress === a}/>
+            <label htmlFor={a}>{a}</label>
+          </p>
+        ))}
+      </div>
+  
+      <form onSubmit={e => e.preventDefault()}>
+        <input value={username} onChange={handleChange} autoFocus placeholder='Your player name'/>
+        <button onClick={() => login(serverAddress, username)}>Login</button>
+      </form>
+    </div>
   )
 }
 

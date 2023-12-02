@@ -24,8 +24,8 @@ let game = new Phaser.Game({
 export default game;
 
 
-export const startGame = (userId) => {
-  connectToRoomServer("localhost:3000", userId);
+export const startGame = (address, userId) => {
+  connectToRoomServer(address, userId);
   game.scene.switch("login", "main");
   game.events.emit("start_game");
 }
