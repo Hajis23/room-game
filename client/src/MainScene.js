@@ -43,6 +43,8 @@ export const getPlayer = (id) => {
 }
 
 export default class MainScene extends Phaser.Scene {
+  started = false;
+
   constructor() {
     super('main');
   }
@@ -57,16 +59,15 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
+    console.log("Creating scene")
+
     // create the Tilemap (key matches the asset key from the loader)
     this.room = new Room(this);
 
-    // Create the player
-    const userId = getClientUserId();
-    this.player = new Player(this, 300, 100, 'charactersheet', 0, userId, true);
-    players[this.player.id] = this.player;
-
     // Set event handlers
     this.sys.game.events.on('room_update', this.handleRoomUpdate, this);
+    this.sys.game.events.on('start_game', this.startGame, this);
+    this.sys.game.events.on('stop_game', this.stopGame, this);
 
     // Init keyboard controls
     this.keys = this.input.keyboard.createCursorKeys();
@@ -74,7 +75,20 @@ export default class MainScene extends Phaser.Scene {
     // Init camera
     this.cameras.main.setBounds(0, 0, this.room.widthInPixels, this.room.heightInPixels);
     this.cameras.main.setZoom(6);
+
+    // When creating scene, start_game event is not yet captured so start game manually here
+    this.startGame();
+  }
+
+  startGame() {
+    console.log("starting game")
+
+    // Create the player
+    const userId = getClientUserId();
+    this.player = new Player(this, 300, 100, 'charactersheet', 0, userId, true);
+    players[this.player.id] = this.player;
     this.cameras.main.startFollow(this.player);
+    this.started = true;
 
     // Send input messages to server every 100ms. Save the timer so we can for example cancel it later.
     this.inputInterval = this.time.addEvent({
@@ -89,7 +103,19 @@ export default class MainScene extends Phaser.Scene {
     });
   }
 
+  stopGame() {
+    console.log("stopping game")
+  
+    this.started = false;
+    this.player.destroy();
+    this.player = null;
+    this.inputInterval.destroy();
+    this.inputInterval = null;
+  }
+
   update(time, deltaTime) {
+    if (!this.started) return;
+  
     this.player.clientInput = this.getClientInput()
     for (const id in players) {
       const player = getPlayer(id);

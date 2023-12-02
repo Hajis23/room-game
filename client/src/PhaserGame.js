@@ -27,11 +27,13 @@ export default game;
 export const startGame = (userId) => {
   connectToRoomServer("localhost:3000", userId);
   game.scene.switch("login", "main");
+  game.events.emit("start_game");
 }
 
 export const stopGame = () => {
   game.scene.switch("main", "login");
   disconnectRoomServer();
+  game.events.emit("stop_game");
 }
 
 export const emitGameEvent = (event, payload) => {

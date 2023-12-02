@@ -15,7 +15,7 @@ const createPlayer = (id) => {
     100,
     20,
     12,
-    { isStatic: false, label: id, frictionAir: 0.2, frictionStatic: 0.5, friction: 0.1, mass: 100 }
+    { isStatic: false, label: id, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100 }
   );
 
   players[id] = player;
@@ -35,6 +35,22 @@ const setCurrentInput = (id, input) => {
     }
   } else {
     players[id].animationState = "idle";
+  }
+}
+
+const updatePlayer = (player) => {
+  if (player.currentInput) {
+    const { up, down, left, right } = player.currentInput;
+
+    let x = 0;
+    let y = 0;
+
+    if (up) y -= 0.1;
+    if (down) y += 0.1;
+    if (left) x -= 0.1;
+    if (right) x += 0.1;
+
+    Matter.Body.applyForce(player, player.position, { x, y });
   }
 }
 
@@ -77,26 +93,16 @@ const processUpdate = (io, bodies) => {
   // Check if bodies are leaving the room?
 
   // Process player input
-  Object.values(players).forEach(player => {
-    if (player.currentInput) {
-      const { up, down, left, right } = player.currentInput;
+  Object.values(players).forEach(updatePlayer)
 
-      let x = 0;
-      let y = 0;
-
-      if (up) y -= 0.1;
-      if (down) y += 0.1;
-      if (left) x -= 0.1;
-      if (right) x += 0.1;
-  
-      Matter.Body.applyForce(player, player.position, { x, y });
-    }
-  })
+  const serializedBodies = dynamicBodies.map(transformBodyToData);
+  const payload = {
+    bodies: serializedBodies,
+    timestamp: Date.now(),
+  }
 
   // Send the bodies' data to the clients
-  io.emit("update", {
-    bodies: dynamicBodies.map(transformBodyToData),
-  });
+  io.emit("update", payload);
 }
 
 /**
