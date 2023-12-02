@@ -13,6 +13,9 @@ const { Socket } = require('socket.io-client')
  */
 const primaryObjects = {}
 
+/**
+ * @type {{ [id: string]: SerializedObject }}
+ */
 const replicatedObjects = {};
 
 /**
@@ -21,6 +24,7 @@ const replicatedObjects = {};
  */
 const updateReplicas = (payload) => {
   payload.bodies.forEach((replicaData) => {
+    replicaData.lastUpdated = Date.now()
     replicatedObjects[replicaData.id] = replicaData
   })
 }
@@ -118,6 +122,14 @@ const processUpdate = (clientIO, serverSockets) => {
   const serializedPrimaries = primaries.map(transformPrimaryBodyToData);
   
   const replicas = Object.values(replicatedObjects)
+
+  // Remove expired replicas
+  const now = Date.now()
+  replicas.forEach((replica) => {
+    if (now - replica.lastUpdated > 1000) {
+      delete replicas[replica.id]
+    }
+  })
 
   // Send information about all objects to client
   const clientPayload = {
