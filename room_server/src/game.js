@@ -78,6 +78,7 @@ const updatePrimaryObjects = (body) => {
 }
 
 const removePrimaryObject = (id) => {
+  if (!primaryObjects[id]) return
   Matter.Composite.remove(engine.world, primaryObjects[id])
   delete primaryObjects[id];
 }

@@ -108,6 +108,8 @@ export default class MainScene extends Phaser.Scene {
   
     this.started = false;
     this.player.destroy();
+    delete players[this.player.id];
+    console.log(this.player.id, "destroyed")
     this.player = null;
     this.inputInterval.destroy();
     this.inputInterval = null;
@@ -128,6 +130,7 @@ export default class MainScene extends Phaser.Scene {
     for (const body of bodies) {
       let player = getPlayer(body.label);  
       if (!player) {
+        console.log("new player", body)
         player = new Player(this, 300, 100, 'charactersheet', 0, body.label);
         players[player.id] = player; 
       }

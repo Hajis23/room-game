@@ -95,7 +95,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.isDead) return;
 
     let isRunning = this.animationState === 'walk' || Object.values(this.clientInput).some((v) => v);
-
+    if (!this.anims) {
+      console.log(this)
+    }
     const isRolling = this.anims.currentAnim.key === 'roll' && !this.anims.currentFrame.isLast;
     if (isRolling) { // Keep rolling until anim ends...
       return;
