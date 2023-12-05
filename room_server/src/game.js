@@ -10,6 +10,10 @@ import loadTiledMap from './tiledMapParser.js';
  */
 
 /**
+ * @typedef {{ up: boolean, down: boolean, left: boolean, right: boolean }} Input
+ */
+
+/**
  * @type {{ [id: string]: Matter.Body }}
  */
 const primaryObjects = {}
@@ -30,6 +34,10 @@ const updateReplicas = (payload) => {
   })
 }
 
+/**
+ * 
+ * @param {string} id 
+ */
 const createPlayer = (id) => {
   console.log('creating player', id)
 
@@ -50,6 +58,12 @@ const createPlayer = (id) => {
   Matter.Composite.add(engine.world, player);
 }
 
+/**
+ * 
+ * @param {string} id 
+ * @param {Input} input 
+ * @returns 
+ */
 const setCurrentPlayerInput = (id, input) => {
   if (!primaryObjects[id]) return;
 
@@ -66,7 +80,10 @@ const setCurrentPlayerInput = (id, input) => {
   }
 }
 
-const updatePrimaryObjects = (body) => {
+/**
+ * @param {Matter.Body} body 
+ */
+const updatePrimaryObject = (body) => {
   Matter.Body.setAngularVelocity(body, 0);
 
   if (body.currentInput) {
@@ -86,6 +103,9 @@ const updatePrimaryObjects = (body) => {
   }
 }
 
+/**
+ * @param {string} id 
+ */
 const removePrimaryObject = (id) => {
   if (!primaryObjects[id]) return
   Matter.Composite.remove(engine.world, primaryObjects[id])
@@ -120,7 +140,7 @@ const processUpdate = (clientIO, serverSockets) => {
 
   const primaries = Object.values(primaryObjects)
 
-  primaries.forEach(updatePrimaryObjects)
+  primaries.forEach(updatePrimaryObject)
 
   const serializedPrimaries = primaries.map(transformPrimaryBodyToData);
 
@@ -154,6 +174,30 @@ const processUpdate = (clientIO, serverSockets) => {
 }
 
 /**
+ * @param {Matter.Body} body 
+ * @param {string} roomId
+ */
+const handleRoomChange = (body, roomId) => {
+  // console.log("room change", body.label, roomId)
+}
+
+/**
+ * @param {{ pairs: { bodyA: Matter.Body, bodyB: Matter.Body }[] }} event 
+ */
+const handleObjectCollision = (event) => {
+  const pairs = event.pairs;
+  // Is one of the bodies neighbouring room?
+  pairs.forEach((pair) => {
+    const { bodyA, bodyB } = pair;
+    if (bodyA.label.startsWith("room") && bodyA.label !== ROOM_ID) {
+      handleRoomChange(bodyB, bodyA.label);
+    } else if (bodyB.label.startsWith("room") && bodyB.label !== ROOM_ID) {
+      handleRoomChange(bodyA, bodyB.label);
+    }
+  });
+}
+
+/**
  * @param {Socket} clientIO
  * @param {Socket[]} serverSockets
  */
@@ -173,26 +217,17 @@ const startGame = (clientIO, serverSockets) => {
     Matter.Composite.add(engine.world, object);
   });
 
-  Matter.Events.on(engine, 'collisionStart', (event) => {
-    const { pairs } = event;
-    // Is one of the bodies neighbouring room?
-    pairs.forEach((pair) => {
-      const { bodyA, bodyB } = pair;
-      if (bodyA.label.startsWith('room') && bodyA.label !== ROOM_ID) {
-        console.log('player entered', bodyA.label);
-      } else if (bodyB.label.startsWith('room') && bodyB.label !== ROOM_ID) {
-        console.log('player entered', bodyB.label);
-      }
-    });
-  });
+  Matter.Events.on(engine, 'collisionStart', handleObjectCollision);
+
+  const gameTick = () => {
+    Matter.Engine.update(engine, tickTime);
+    processUpdate(clientIO, serverSockets);
+  }
 
   // Run the game at 20 ticks per second
   const tickTime = 1000 / 20;
   setInterval(() => {
-    measureTime('tick', () => {
-      Matter.Engine.update(engine, tickTime);
-      processUpdate(clientIO, serverSockets);
-    });
+    measureTime("tick", gameTick);
   }, tickTime);
 
   // Log the tick time every 10 seconds
