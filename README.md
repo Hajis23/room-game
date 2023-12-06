@@ -8,29 +8,33 @@ Game with rooms in different servers. Players can move in the rooms. There is di
 The game client is written using [Phaser 3](https://github.com/photonstorm/phaser). 
 User interface is with [React](https://react.dev/) framework.
 
-## Setup and running
+# Setup
 
-To setup the client, ls to `client`.
-
-Install dependencies 
+To install dependencies go to `client/` directory and run:
 ```
-npm i
+npm install
 ```
 
-Start the client on port 8000 in development mode with hot reloading
+# Run
+
+First install dependencies to the client.
+
+After that client can be run with
 ```
-npm start
+npm run client
+```
+and server can be run with
+```
+npm run room_server
 ```
 
-## Architecture sketches
+# Architecture sketches
 
 <img height="500" alt="image" src="https://github.com/Hajis23/room-game/assets/54055199/12217c95-4038-44f9-9b17-8e8061262016">
 
 <img height="500" alt="image" src="https://github.com/Hajis23/room-game/assets/54055199/5c543878-6aee-4a6c-a400-7d748db6b49c">
 
-
-
-## Group
+# Group
 - Elias
 - Veikko
 - Leevi
