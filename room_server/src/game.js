@@ -174,11 +174,31 @@ const processUpdate = (clientIO, serverSockets) => {
 }
 
 /**
+ * @param {SerializedObject} body 
+ * @param {string} roomId
+ */
+const receiveObjectTransfer = (body, roomId) => {
+  console.log("object", body.id, "is entering room", roomId, "from room", ROOM_ID);
+  // Promote this body to a primary object
+
+  // Acknowledge the neighbouring room server that the body has been promoted
+}
+
+/**
  * @param {Matter.Body} body 
  * @param {string} roomId
  */
-const handleRoomChange = (body, roomId) => {
-  // console.log("room change", body.label, roomId)
+const handleObjectTransfer = (body, roomId) => {
+  const objectId = body.label;
+  console.log("object", objectId, "is leaving room", ROOM_ID, "to room", roomId);
+
+  // Is this body a player? If so, tell the client to change room
+
+  // (Is the neighbouring room server available?)
+
+  // Contact the neighbouring room server and tell it to promote this body to a primary object to start simulating it
+
+  // Once the neighbouring room server has promoted the body, demote it to a replica on this server
 }
 
 /**
@@ -190,9 +210,9 @@ const handleObjectCollision = (event) => {
   pairs.forEach((pair) => {
     const { bodyA, bodyB } = pair;
     if (bodyA.label.startsWith("room") && bodyA.label !== ROOM_ID) {
-      handleRoomChange(bodyB, bodyA.label);
+      handleObjectTransfer(bodyB, bodyA.label);
     } else if (bodyB.label.startsWith("room") && bodyB.label !== ROOM_ID) {
-      handleRoomChange(bodyA, bodyB.label);
+      handleObjectTransfer(bodyA, bodyB.label);
     }
   });
 }
@@ -236,6 +256,12 @@ const startGame = (clientIO, serverSockets) => {
   // }, 10_000)
 }
 
+<<<<<<< HEAD
 export {
   startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas,
 };
+||||||| parent of 2e8c283 (Create object transfer func)
+export { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas };
+=======
+export { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas, receiveObjectTransfer };
+>>>>>>> 2e8c283 (Create object transfer func)

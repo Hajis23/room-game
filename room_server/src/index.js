@@ -1,8 +1,19 @@
 import { Server } from 'socket.io';
+<<<<<<< HEAD
 import { io as socketClient } from 'socket.io-client';
+||||||| parent of 2e8c283 (Create object transfer func)
+import { io as socketClient, Socket } from "socket.io-client"; 
+=======
+>>>>>>> 2e8c283 (Create object transfer func)
 
+<<<<<<< HEAD
 import http from 'http';
 import { startGame } from './game.js';
+||||||| parent of 2e8c283 (Create object transfer func)
+import { updateReplicas, startGame } from "./game.js";
+=======
+import { startGame } from "./game.js";
+>>>>>>> 2e8c283 (Create object transfer func)
 
 import registerClientHandlers from './clientHandler.js';
 import registerServerHandlers from './serverHandler.js';
@@ -16,6 +27,7 @@ const server = http.createServer((req, res) => {
 });
 server.listen(process.env.PORT);
 
+<<<<<<< HEAD
 const { NAME } = process.env;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 
@@ -24,6 +36,21 @@ const serverSockets = neighbourList.map(
 );
 
 const io = new Server(server, {
+||||||| parent of 2e8c283 (Create object transfer func)
+const NAME = process.env.NAME;
+const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
+
+/**
+ * @type {Socket[]}
+ */
+const serverSockets = neighbourList.map(
+  address => socketClient(address, { auth: { type: "room" } })
+);
+
+const io = new Server(server, {
+=======
+const server_io = new Server(serverServer, {
+>>>>>>> 2e8c283 (Create object transfer func)
   cors: {
     origin: '*',
   },
@@ -44,8 +71,9 @@ io.on('connection', (socket) => {
 });
 
 // Start the game
-startGame(io, serverSockets);
-console.log(`${NAME}, PORT = ${process.env.PORT}`)
+startGame(client_io, serverSockets);
+
+console.log(`${process.env.NAME}, SERVER_PORT = ${process.env.SERVER_PORT}, CLIENT_PORT = ${process.env.CLIENT_PORT}`)
 
 // Ping neighbours after 1 second
 setTimeout(() => neighbourList.map(async (address) => {
