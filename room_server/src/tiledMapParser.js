@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
 
 import { ROOM_ID } from './utils.js';
+import logger from './logger.js';
 
 import mapJSON from "../base.json" with { type: "json" };
 
@@ -28,7 +29,7 @@ const loadTiledMap = () => {
   }).map((object) => 
     Matter.Bodies.rectangle(object.x + (object.width / 2), object.y + (object.height / 2), object.width, object.height, { isStatic: true }))
   
-  console.log("Created collision objects:", objects.length)
+  logger.info("Created collision objects:", objects.length)
 
   return {
     objects,

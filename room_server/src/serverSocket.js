@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client"; 
+import logger from "./logger.js";
 
 /**
  * @type {{ address: string, id: string}[]}
@@ -38,7 +39,7 @@ export const sendServerMessage = (roomId, type, payload) => {
 setTimeout(() => neighbourList.map(async ({ address }) => {
   try {
     const res = await fetch(address)
-    console.log('neighbour', address, await res.text())
+    logger.info('neighbour', address, await res.text())
   } catch (e) {
     console.error('neighbour', address, e)
   }

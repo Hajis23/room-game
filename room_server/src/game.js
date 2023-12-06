@@ -4,6 +4,7 @@ import { Socket } from 'socket.io-client'
 import { measureTime, getAverageTime, ROOM_ID } from './utils.js';
 import loadTiledMap from './tiledMapParser.js';
 import { broadcastServerMessage, getAddressForRoom, sendServerMessage } from './serverSocket.js';
+import logger from './logger.js';
 
 /**
  * (Someone can expand this typedef but id is enough for now.)
@@ -53,18 +54,18 @@ const connectPlayer = (id, socket) => {
 
   if (isNewPlayer) {
     // New player
-    console.log('creating new player', id)
+    logger.tag(id).info('creating new player')
     player = createPrimaryObject({ id, position: { x: 300, y: 100 }, animationState: 'idle', flipX: false });
 
   } else if (existingReplica && !existingPrimary) {
     // Existing replica but need to promote to primary
-    console.log('promoting replica to primary', id)
+    logger.tag(id).info('promoting replica to primary')
     player = createPrimaryObject(existingReplica);
     delete replicatedObjects[id];
 
   } else if (existingPrimary) {
     // Existing primary, usual case when reconnecting or being transferred
-    console.log('connecting existing primary', id)
+    logger.tag(id).info('connecting existing primary')
     player = existingPrimary;
   }
 
@@ -216,7 +217,7 @@ const createPrimaryObject = (bodyPayload) => {
  * @param {Socket} roomSocket
  */
 const receiveObjectTransfer = (bodyPayload, roomId, roomSocket) => {
-  console.log("receiving", bodyPayload.id, "from", roomId);
+  logger.tag(bodyPayload.id).info("received from", roomId);
 
   // Promote this body to a primary object
   const primaryObject = createPrimaryObject(bodyPayload);
@@ -237,13 +238,13 @@ const handleObjectTransfer = (body, roomId) => {
   if (body.createdAt + 2000 > Date.now()) return;
   if (body.receivedAt + 2000 > Date.now()) return;
 
-  console.log("object", body.id, "is leaving room", ROOM_ID, "to room", roomId);
+  logger.tag(body.id).info("transferring to", roomId);
   body.isTransferring = true;
 
   // Is this body a player? If so, tell the client to change room
   if (body.clientSocket) {
     const address = getAddressForRoom(roomId);
-    console.log("telling", body.id, "to change room to", address);
+    logger.tag(body.id).info("told to connect to", address);
     body.clientSocket.emit('changeRoom', { roomId, address });
   }
 
@@ -254,6 +255,7 @@ const handleObjectTransfer = (body, roomId) => {
 
   // Once the neighbouring room server has promoted the body, demote it to a replica on this server
   removePrimaryObject(body.id);
+  replicatedObjects[body.id] = serializePrimaryBody(body);
 }
 
 /**
@@ -308,7 +310,7 @@ const startGame = (clientIO) => {
 
   // Log the tick time every 10 seconds
   // setInterval(() => {
-  //   console.log("ticktime:", getAverageTime("tick", true), "ms")
+  //   logger.info("ticktime:", getAverageTime("tick", true), "ms")
   // }, 10_000)
 }
 

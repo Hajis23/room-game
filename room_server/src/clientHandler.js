@@ -3,6 +3,7 @@ import {
   removePrimaryObject,
   connectPlayer,
 } from './game.js';
+import logger from './logger.js';
 
 export default function (io, socket) {
   function input(data) {
@@ -14,14 +15,14 @@ export default function (io, socket) {
   }
 
   function disconnect(reason) {
-    console.log('client disconnected', socket.id, reason);
-
     const { id } = socket.handshake.auth;
+    logger.tag(id).info('disconnected', reason);
     removePrimaryObject(id);
   }
 
   const { auth } = socket.handshake;
-  console.log('a client connected', socket.id);
+
+  logger.tag(auth.id).info('connected');
 
   connectPlayer(auth.id, socket);
 

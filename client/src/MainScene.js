@@ -127,12 +127,8 @@ export default class MainScene extends Phaser.Scene {
     const { bodies } = data
     for (const body of bodies) {
       let player = getPlayer(body.id);
-      if (player?.id === getClientUserId()) {
-        console.log('updating client player', body.position.y)
-      };
 
       if (!player) {
-        console.log('new player', body)
         player = new Player(this, 300, 100, 'charactersheet', 0, body.id);
         players[player.id] = player;
       }

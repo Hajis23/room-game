@@ -2,6 +2,7 @@ import {
   updateReplicas,
   receiveObjectTransfer
 } from './game.js';
+import logger from './logger.js';
 
 export default function (io, socket) {
   const { auth } = socket.handshake;
@@ -20,10 +21,10 @@ export default function (io, socket) {
   }
 
   function disconnect(reason) {
-    console.log('server disconnected', socket.id, reason);
+    logger.info('server disconnected', socket.id, reason);
   }
 
-  console.log('a server connected', socket.id);
+  logger.info('a server connected', socket.id);
 
   socket.on('update', update);
   socket.on('objectTransfer', handleReceiveObjectTransfer);

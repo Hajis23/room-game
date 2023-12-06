@@ -5,11 +5,12 @@ import { startGame } from './game.js';
 
 import registerClientHandlers from './clientHandler.js';
 import registerServerHandlers from './serverHandler.js';
+import logger from './logger.js';
 
 // A simple http server to ping:
 
 const server = http.createServer((req, res) => {
-  console.log('ping')
+  logger.info('ping')
   res.writeHead(200);
   res.end('ok');
 });
@@ -38,4 +39,4 @@ io.on('connection', (socket) => {
 // Start the game
 startGame(io);
 
-console.log(`${process.env.NAME}, PORT = ${process.env.PORT}`)
+logger.info(`${process.env.NAME}, PORT = ${process.env.PORT}`)
