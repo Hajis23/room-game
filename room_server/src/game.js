@@ -1,7 +1,8 @@
-const Matter = require('matter-js');
-const { measureTime, getAverageTime, ROOM_ID } = require('./utils');
-const loadTiledMap = require('./tiledMapParser');
-const { Socket } = require('socket.io-client')
+import Matter from 'matter-js';
+import { Socket } from 'socket.io-client'
+
+import { measureTime, getAverageTime, ROOM_ID } from './utils.js';
+import loadTiledMap from './tiledMapParser.js';
 
 /**
  * (Someone can expand this typedef but id is enough for now.)
@@ -198,4 +199,4 @@ const startGame = (clientIO, serverSockets) => {
   // }, 10_000)
 }
 
-module.exports = { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas };
+export { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas };

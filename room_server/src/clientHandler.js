@@ -1,10 +1,10 @@
-const {
+import {
   setCurrentPlayerInput,
   removePrimaryObject,
   createPlayer,
-} = require("./game");
+} from "./game.js";
 
-module.exports = (io, socket) => {
+export default function(io, socket) {
   function input(data) {
     const id = socket.handshake.auth.id;
 
@@ -27,4 +27,4 @@ module.exports = (io, socket) => {
 
   socket.on("disconnect", disconnect)
   socket.on("input", input);
-};
+}

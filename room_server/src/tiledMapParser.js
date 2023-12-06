@@ -1,9 +1,10 @@
-const Matter = require('matter-js')
-const { ROOM_ID } = require('./utils')
+import Matter from 'matter-js';
+
+import { ROOM_ID } from './utils.js';
+
+import mapJSON from "../base.json" with { type: "json" };
 
 const loadTiledMap = () => {
-
-  const mapJSON = require("../base.json")
 
   const roomsLayer = mapJSON.layers.find((layer) => layer.name === "rooms")
   if (!roomsLayer) throw new Error("No rooms layer found in map")
@@ -32,7 +33,7 @@ const loadTiledMap = () => {
   return {
     objects,
     roomObjects,
-  }
-}
+  };
+};
 
-module.exports = loadTiledMap
+export default loadTiledMap;

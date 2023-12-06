@@ -1,11 +1,13 @@
-const { Server } = require('socket.io');
-const { io: socketClient, Socket } = require("socket.io-client"); 
-const game = require('./game');
+import { Server } from 'socket.io';
+import { io as socketClient, Socket } from "socket.io-client"; 
 
-const registerClientHandlers = require("./clientHandler");
+import { updateReplicas, startGame } from "./game.js";
+
+import registerClientHandlers from "./clientHandler.js";
 
 // A simple http server to ping:
-const http = require('http');
+import http from 'http';
+
 const clientServer = http.createServer((req, res) => {
   console.log("client server pinged")
   res.writeHead(200);
@@ -51,7 +53,7 @@ server_io.on('connection', (socket) => {
   console.log('a server connected', socket.id);
 
   socket.on("update", (payload) => {
-    game.updateReplicas(payload)
+    updateReplicas(payload)
   })
 
   socket.on("disconnect", (reason) => {
@@ -60,7 +62,7 @@ server_io.on('connection', (socket) => {
 });
 
 // Start the game
-game.startGame(client_io, serverSockets);
+startGame(client_io, serverSockets);
 
 console.log(`${NAME}, SERVER_PORT = ${process.env.SERVER_PORT}, CLIENT_PORT = ${process.env.CLIENT_PORT}`)
 
