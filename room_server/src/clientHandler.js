@@ -4,6 +4,9 @@ import {
   createPlayer,
 } from "./game.js";
 
+const USER = "user";
+const ROOM = "room";
+
 export default function(io, socket) {
   function input(data) {
     const id = socket.handshake.auth.id;
@@ -20,10 +23,10 @@ export default function(io, socket) {
     removePrimaryObject(id);
   }
 
+  const auth = socket.handshake.auth;
   console.log('a user connected', socket.id);
 
-  const id = socket.handshake.auth.id;
-  createPlayer(id);
+  createPlayer(auth.id);
 
   socket.on("disconnect", disconnect)
   socket.on("input", input);

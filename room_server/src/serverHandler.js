@@ -11,6 +11,7 @@ export default function(io, socket) {
     console.log("server disconnected", socket.id, reason);
   }
 
+  const auth = socket.handshake.auth;
   console.log('a server connected', socket.id);
 
   socket.on("update", update);

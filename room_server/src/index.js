@@ -9,19 +9,12 @@ import registerServerHandlers from "./serverHandler.js";
 // A simple http server to ping:
 import http from 'http';
 
-const clientServer = http.createServer((req, res) => {
-  console.log("client server pinged")
+const server = http.createServer((req, res) => {
+  console.log("ping")
   res.writeHead(200);
   res.end('ok');
 });
-clientServer.listen(process.env.CLIENT_PORT);
-
-const serverServer = http.createServer((req, res) => {
-  console.log("server server pinged")
-  res.writeHead(200);
-  res.end('ok');
-})
-serverServer.listen(process.env.SERVER_PORT);
+server.listen(process.env.PORT);
 
 const NAME = process.env.NAME;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
@@ -29,35 +22,34 @@ const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 /**
  * @type {Socket[]}
  */
-const serverSockets = neighbourList.map(address => socketClient(address));
+const serverSockets = neighbourList.map(
+  address => socketClient(address, { auth: { type: "room" } })
+);
 
-const server_io = new Server(serverServer, {
+const io = new Server(server, {
   cors: {
     origin: '*',
   },
 });
 
-const client_io = new Server(clientServer, {
-  cors: {
-    origin: '*',
-  },
-});
+const USER = "user";
+const ROOM = "room";
 
 // Connections from clients
-client_io.on('connection', (socket) => {
-  registerClientHandlers(client_io, socket);
+io.on('connection', (socket) => {
+  const auth = socket.handshake.auth;
+  if (auth.type == USER) {
+    registerClientHandlers(io, socket);
+  }
+  if (auth.type == ROOM) {
+    registerServerHandlers(io, socket);
+  }
 });
 
-
-// Connections from other servers
-server_io.on('connection', (socket) => {
-  registerServerHandlers(server_io, socket);
-});
 
 // Start the game
-startGame(client_io, serverSockets);
-
-console.log(`${NAME}, SERVER_PORT = ${process.env.SERVER_PORT}, CLIENT_PORT = ${process.env.CLIENT_PORT}`)
+startGame(io, serverSockets);
+console.log(`${NAME}, PORT = ${process.env.PORT}`)
 
 // Ping neighbours after 1 second
 setTimeout(() => neighbourList.map(async (address) => {
