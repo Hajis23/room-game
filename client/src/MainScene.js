@@ -25,7 +25,7 @@ const hideOldPlayers = () => {
 
 const updatePlayer = (player, body) => {
   player.setPosition(body.position.x, body.position.y);
-  player.setVelocity(body.velocity.x * multiplier, body.velocity.y * multiplier);
+  // player.setVelocity(body.velocity.x * multiplier, body.velocity.y * multiplier);
   player.animationState = body.animationState;
   if (!player.isClientPlayer) player.flipX = body.flipX;
   player.lastUpdated = Date.now();
@@ -84,6 +84,7 @@ export default class MainScene extends Phaser.Scene {
     const userId = getClientUserId();
     this.player = new Player(this, 300, 100, 'charactersheet', 0, userId, true);
     players[this.player.id] = this.player;
+    console.log('created player', this.player.id)
     this.cameras.main.startFollow(this.player);
     this.started = true;
 
@@ -124,12 +125,15 @@ export default class MainScene extends Phaser.Scene {
 
   handleRoomUpdate(data) {
     const { bodies } = data
-    console.log('room update', bodies.length)
     for (const body of bodies) {
-      let player = getPlayer(body.label);
+      let player = getPlayer(body.id);
+      if (player?.id === getClientUserId()) {
+        console.log('updating client player', body.position.y)
+      };
+
       if (!player) {
         console.log('new player', body)
-        player = new Player(this, 300, 100, 'charactersheet', 0, body.label);
+        player = new Player(this, 300, 100, 'charactersheet', 0, body.id);
         players[player.id] = player;
       }
       updatePlayer(player, body);

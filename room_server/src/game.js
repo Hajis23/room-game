@@ -11,6 +11,10 @@ import { broadcastServerMessage, getAddressForRoom, sendServerMessage } from './
  */
 
 /**
+ * @typedef {{ id: string} & Matter.Body} PrimaryObject
+ */
+
+/**
  * @typedef {{ up: boolean, down: boolean, left: boolean, right: boolean }} Input
  */
 
@@ -39,50 +43,33 @@ const updateReplicas = (payload) => {
  * @param {string} id 
  * @param {Socket} socket
  */
-const createPlayer = (id, socket) => {
+const connectPlayer = (id, socket) => {
   const existingReplica = replicatedObjects[id];
+  const existingPrimary = primaryObjects[id];
 
-  if (existingReplica) {
+  let player = null;
+
+  const isNewPlayer = !existingReplica && !existingPrimary;
+
+  if (isNewPlayer) {
+    // New player
+    console.log('creating new player', id)
+    player = createPrimaryObject({ id, position: { x: 300, y: 100 }, animationState: 'idle', flipX: false });
+
+  } else if (existingReplica && !existingPrimary) {
+    // Existing replica but need to promote to primary
     console.log('promoting replica to primary', id)
-  } else {
-    console.log('creating player', id)
+    player = createPrimaryObject(existingReplica);
+    delete replicatedObjects[id];
+
+  } else if (existingPrimary) {
+    // Existing primary, usual case when reconnecting or being transferred
+    console.log('connecting existing primary', id)
+    player = existingPrimary;
   }
-
-  const x = existingReplica?.position?.x || 300;
-  const y = existingReplica?.position?.y || 100;
-  const velocity = existingReplica?.velocity || { x: 0, y: 0 };
-  const animationState = existingReplica?.animationState || 'idle';
-  const flipX = existingReplica?.flipX || false;
-
-  const player = Matter.Bodies.rectangle(
-    x,
-    y,
-    20,
-    12,
-    {
-      isStatic: false, label: id, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100,
-    },
-  );
-
-  // Always attach an id to primary objects
-  player.id = id;
 
   // Attach the socket to the player
   player.clientSocket = socket;
-
-  player.animationState = animationState;
-  player.flipX = flipX;
-  player.velocity = velocity;
-
-  player.createdAt = Date.now();
-
-  if (existingReplica) {
-    player.receivedAt = Date.now();
-    delete replicatedObjects[id];
-  }
-
-  primaryObjects[id] = player;
-  Matter.Composite.add(engine.world, player);
 }
 
 /**
@@ -152,7 +139,6 @@ let engine = null;
 const serializePrimaryBody = (body) => ({
   position: body.position,
   velocity: body.velocity,
-  label: body.label,
   animationState: body.animationState,
   flipX: body.flipX,
   id: body.id,
@@ -197,13 +183,47 @@ const processUpdate = (clientIO) => {
 }
 
 /**
- * @param {SerializedObject} body 
+ * @param {SerializedObject} bodyPayload
+ */
+const createPrimaryObject = (bodyPayload) => {
+  const body = Matter.Bodies.rectangle(
+    bodyPayload.position.x,
+    bodyPayload.position.y,
+    20,
+    12,
+    {
+      isStatic: false, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100,
+    },
+  );
+
+  body.id = bodyPayload.id;
+  body.velocity = bodyPayload.velocity || { x: 0, y: 0 };
+  body.createdAt = Date.now();
+  body.receivedAt = Date.now();
+  body.animationState = bodyPayload.animationState;
+  body.flipX = bodyPayload.flipX;
+
+  primaryObjects[body.id] = body;
+
+  Matter.Composite.add(engine.world, body);
+
+  return body;
+}
+
+/**
+ * @param {SerializedObject} bodyPayload 
  * @param {string} roomId
  * @param {Socket} roomSocket
  */
-const receiveObjectTransfer = (body, roomId, roomSocket) => {
-  console.log("receiving", body.id, "from", roomId);
+const receiveObjectTransfer = (bodyPayload, roomId, roomSocket) => {
+  console.log("receiving", bodyPayload.id, "from", roomId);
+
   // Promote this body to a primary object
+  const primaryObject = createPrimaryObject(bodyPayload);
+
+  if (replicatedObjects[primaryObject.id]) {
+    delete replicatedObjects[primaryObject.id];
+  }
 
   // Acknowledge the neighbouring room server that the body has been promoted
 }
@@ -213,18 +233,17 @@ const receiveObjectTransfer = (body, roomId, roomSocket) => {
  * @param {string} roomId
  */
 const handleObjectTransfer = (body, roomId) => {
-  const objectId = body.label;
   if (body.isTransferring) return;
   if (body.createdAt + 2000 > Date.now()) return;
   if (body.receivedAt + 2000 > Date.now()) return;
 
-  console.log("object", objectId, "is leaving room", ROOM_ID, "to room", roomId);
+  console.log("object", body.id, "is leaving room", ROOM_ID, "to room", roomId);
   body.isTransferring = true;
 
   // Is this body a player? If so, tell the client to change room
   if (body.clientSocket) {
     const address = getAddressForRoom(roomId);
-    console.log("telling", objectId, "to change room to", address);
+    console.log("telling", body.id, "to change room to", address);
     body.clientSocket.emit('changeRoom', { roomId, address });
   }
 
@@ -234,6 +253,7 @@ const handleObjectTransfer = (body, roomId) => {
   sendServerMessage(roomId, 'objectTransfer', serializePrimaryBody(body))
 
   // Once the neighbouring room server has promoted the body, demote it to a replica on this server
+  removePrimaryObject(body.id);
 }
 
 /**
@@ -244,10 +264,12 @@ const handleObjectCollision = (event) => {
   // Is one of the bodies neighbouring room?
   pairs.forEach((pair) => {
     const { bodyA, bodyB } = pair;
-    if (bodyA.label.startsWith("room") && bodyA.label !== ROOM_ID) {
-      handleObjectTransfer(bodyB, bodyA.label);
-    } else if (bodyB.label.startsWith("room") && bodyB.label !== ROOM_ID) {
-      handleObjectTransfer(bodyA, bodyB.label);
+    const bodyARoomId = bodyA.label;
+    const bodyBRoomId = bodyB.label;
+    if (bodyARoomId.startsWith("room") && bodyARoomId !== ROOM_ID) {
+      handleObjectTransfer(bodyB, bodyARoomId);
+    } else if (bodyBRoomId.startsWith("room") && bodyBRoomId !== ROOM_ID) {
+      handleObjectTransfer(bodyA, bodyBRoomId);
     }
   });
 }
@@ -279,7 +301,7 @@ const startGame = (clientIO) => {
   }
 
   // Run the game at 20 ticks per second
-  const tickTime = 1000 / 10;
+  const tickTime = 1000 / 20;
   setInterval(() => {
     measureTime("tick", gameTick);
   }, tickTime);
@@ -291,5 +313,5 @@ const startGame = (clientIO) => {
 }
 
 export {
-  startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas, receiveObjectTransfer
+  startGame, connectPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas, receiveObjectTransfer
 };

@@ -56,6 +56,6 @@ export const connectToRoomServer = (address, userId) => {
 }
 
 export const sendInputMessage = async (input) => {
-  console.log('Sending input message to, ', getSocket()._opts.port, getSocket().connected);
+  // console.log('Sending input message to, ', getSocket()._opts.port, getSocket().connected);
   getSocket().emit('input', input);
 };

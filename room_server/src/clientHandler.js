@@ -1,7 +1,7 @@
 import {
   setCurrentPlayerInput,
   removePrimaryObject,
-  createPlayer,
+  connectPlayer,
 } from './game.js';
 
 export default function (io, socket) {
@@ -9,7 +9,6 @@ export default function (io, socket) {
     const { id } = socket.handshake.auth;
 
     setTimeout(() => { // Simulate latency
-      console.log("getting input from client", id)
       setCurrentPlayerInput(id, data);
     }, 0);
   }
@@ -22,9 +21,9 @@ export default function (io, socket) {
   }
 
   const { auth } = socket.handshake;
-  console.log('a user connected', socket.id);
+  console.log('a client connected', socket.id);
 
-  createPlayer(auth.id, socket);
+  connectPlayer(auth.id, socket);
 
   socket.on('disconnect', disconnect)
   socket.on('input', input);
