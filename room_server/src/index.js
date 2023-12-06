@@ -43,17 +43,6 @@ const client_io = new Server(clientServer, {
 // Connections from clients
 client_io.on('connection', (socket) => {
   registerClientHandlers(client_io, socket);
-
-  const auth = socket.handshake.auth;
-  const id = auth.id;
-  game.createPlayer(id);
-
-  console.log('a user connected', socket.id);
-
-  socket.on("disconnect", (reason) => {
-    console.log("client disconnected", socket.id, reason);
-    game.removePrimaryObject(id);
-  })
 });
 
 
