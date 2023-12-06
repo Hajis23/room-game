@@ -20,8 +20,8 @@ const primaryObjects = {}
 const replicatedObjects = {};
 
 /**
- * 
- * @param {{ timestamp: number, bodies: SerializedObject[] }} payload 
+ *
+ * @param {{ timestamp: number, bodies: SerializedObject[] }} payload
  */
 const updateReplicas = (payload) => {
   payload.bodies.forEach((replicaData) => {
@@ -31,14 +31,16 @@ const updateReplicas = (payload) => {
 }
 
 const createPlayer = (id) => {
-  console.log("creating player", id)
+  console.log('creating player', id)
 
   const player = Matter.Bodies.rectangle(
     300,
     100,
     20,
     12,
-    { isStatic: false, label: id, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100 }
+    {
+      isStatic: false, label: id, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100,
+    },
   );
 
   // Always attach an id to primary objects
@@ -53,14 +55,14 @@ const setCurrentPlayerInput = (id, input) => {
 
   primaryObjects[id].currentInput = input;
   if (Object.values(input).some((v) => v)) {
-    primaryObjects[id].animationState = "walk";
+    primaryObjects[id].animationState = 'walk';
     if (input.left) {
       primaryObjects[id].flipX = true;
     } else if (input.right) {
       primaryObjects[id].flipX = false;
     }
   } else {
-    primaryObjects[id].animationState = "idle";
+    primaryObjects[id].animationState = 'idle';
   }
 }
 
@@ -68,7 +70,9 @@ const updatePrimaryObjects = (body) => {
   Matter.Body.setAngularVelocity(body, 0);
 
   if (body.currentInput) {
-    const { up, down, left, right } = body.currentInput;
+    const {
+      up, down, left, right,
+    } = body.currentInput;
 
     let x = 0;
     let y = 0;
@@ -95,19 +99,17 @@ let engine = null;
 
 /**
  * Send the body's relevant fields to the client
- * @param {Matter.Body} body 
+ * @param {Matter.Body} body
  * @returns {SerializedObject}
  */
-const transformPrimaryBodyToData = (body) => {
-  return {
-    position: body.position,
-    velocity: body.velocity,
-    label: body.label,
-    animationState: body.animationState,
-    flipX: body.flipX,
-    id: body.id,
-  };
-}
+const transformPrimaryBodyToData = (body) => ({
+  position: body.position,
+  velocity: body.velocity,
+  label: body.label,
+  animationState: body.animationState,
+  flipX: body.flipX,
+  id: body.id,
+})
 
 /**
  * @param {Socket} clientIO
@@ -121,7 +123,7 @@ const processUpdate = (clientIO, serverSockets) => {
   primaries.forEach(updatePrimaryObjects)
 
   const serializedPrimaries = primaries.map(transformPrimaryBodyToData);
-  
+
   const replicas = Object.values(replicatedObjects)
 
   // Remove expired replicas
@@ -144,10 +146,10 @@ const processUpdate = (clientIO, serverSockets) => {
     timestamp: Date.now(),
   }
 
-  clientIO.emit("update", clientPayload);
-  serverSockets.forEach(socket => {
+  clientIO.emit('update', clientPayload);
+  serverSockets.forEach((socket) => {
     // console.log("sending payload to ", socket.)
-    socket.emit("update", serverPayload)
+    socket.emit('update', serverPayload)
   })
 }
 
@@ -172,14 +174,14 @@ const startGame = (clientIO, serverSockets) => {
   });
 
   Matter.Events.on(engine, 'collisionStart', (event) => {
-    const pairs = event.pairs;
+    const { pairs } = event;
     // Is one of the bodies neighbouring room?
     pairs.forEach((pair) => {
       const { bodyA, bodyB } = pair;
-      if (bodyA.label.startsWith("room") && bodyA.label !== ROOM_ID) {
-        console.log("player entered", bodyA.label);
-      } else if (bodyB.label.startsWith("room") && bodyB.label !== ROOM_ID) {
-        console.log("player entered", bodyB.label);
+      if (bodyA.label.startsWith('room') && bodyA.label !== ROOM_ID) {
+        console.log('player entered', bodyA.label);
+      } else if (bodyB.label.startsWith('room') && bodyB.label !== ROOM_ID) {
+        console.log('player entered', bodyB.label);
       }
     });
   });
@@ -187,7 +189,7 @@ const startGame = (clientIO, serverSockets) => {
   // Run the game at 20 ticks per second
   const tickTime = 1000 / 20;
   setInterval(() => {
-    measureTime("tick", () => {
+    measureTime('tick', () => {
       Matter.Engine.update(engine, tickTime);
       processUpdate(clientIO, serverSockets);
     });
@@ -199,4 +201,6 @@ const startGame = (clientIO, serverSockets) => {
   // }, 10_000)
 }
 
-export { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas };
+export {
+  startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas,
+};

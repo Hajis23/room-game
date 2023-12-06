@@ -1,27 +1,28 @@
 import Phaser from 'phaser';
 
+/* eslint-disable */
 const hashString = (str) => {
   let hash = 0;
   if (str.length === 0) return hash;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
+    hash &= hash;
   }
   return hash;
 }
+/* eslint-enable */
 
 export default class Player extends Phaser.Physics.Arcade.Sprite {
-
   /**
-   * 
-   * @param {Phaser.Scene} scene 
-   * @param {*} x 
-   * @param {*} y 
-   * @param {*} texture 
-   * @param {*} frame 
-   * @param {*} id 
-   * @param {*} isClientPlayer 
+   *
+   * @param {Phaser.Scene} scene
+   * @param {*} x
+   * @param {*} y
+   * @param {*} texture
+   * @param {*} frame
+   * @param {*} id
+   * @param {*} isClientPlayer
    */
   constructor(scene, x, y, texture, frame, id, isClientPlayer = false) {
     super(scene, x, y, texture, frame);
@@ -91,10 +92,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.depth = this.y;
     // Draw text above player
     this.nameText.depth = this.depth + 1;
-  
+
     if (this.isDead) return;
 
-    let isRunning = this.animationState === 'walk' || Object.values(this.clientInput).some((v) => v);
+    const isRunning = this.animationState === 'walk' || Object.values(this.clientInput).some((v) => v);
     if (!this.anims) {
       console.log(this)
     }

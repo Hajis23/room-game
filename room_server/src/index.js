@@ -1,29 +1,26 @@
 import { Server } from 'socket.io';
-import { io as socketClient, Socket } from "socket.io-client"; 
+import { io as socketClient } from 'socket.io-client';
 
-import { updateReplicas, startGame } from "./game.js";
+import http from 'http';
+import { startGame } from './game.js';
 
-import registerClientHandlers from "./clientHandler.js";
-import registerServerHandlers from "./serverHandler.js";
+import registerClientHandlers from './clientHandler.js';
+import registerServerHandlers from './serverHandler.js';
 
 // A simple http server to ping:
-import http from 'http';
 
 const server = http.createServer((req, res) => {
-  console.log("ping")
+  console.log('ping')
   res.writeHead(200);
   res.end('ok');
 });
 server.listen(process.env.PORT);
 
-const NAME = process.env.NAME;
+const { NAME } = process.env;
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 
-/**
- * @type {Socket[]}
- */
 const serverSockets = neighbourList.map(
-  address => socketClient(address, { auth: { type: "room" } })
+  (address) => socketClient(address, { auth: { type: 'room' } }),
 );
 
 const io = new Server(server, {
@@ -32,20 +29,19 @@ const io = new Server(server, {
   },
 });
 
-const USER = "user";
-const ROOM = "room";
+const USER = 'user';
+const ROOM = 'room';
 
 // Connections from clients
 io.on('connection', (socket) => {
-  const auth = socket.handshake.auth;
-  if (auth.type == USER) {
+  const { auth } = socket.handshake;
+  if (auth.type === USER) {
     registerClientHandlers(io, socket);
   }
-  if (auth.type == ROOM) {
+  if (auth.type === ROOM) {
     registerServerHandlers(io, socket);
   }
 });
-
 
 // Start the game
 startGame(io, serverSockets);
@@ -55,8 +51,8 @@ console.log(`${NAME}, PORT = ${process.env.PORT}`)
 setTimeout(() => neighbourList.map(async (address) => {
   try {
     const res = await fetch(address)
-    console.log("neighbour", address, await res.text())
+    console.log('neighbour', address, await res.text())
   } catch (e) {
-    console.error("neighbour", address, e)
+    console.error('neighbour', address, e)
   }
 }), 1000)

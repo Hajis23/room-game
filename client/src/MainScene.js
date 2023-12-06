@@ -18,11 +18,10 @@ const hideOldPlayers = () => {
     if (player.lastUpdated < now - 1000) {
       player.destroy();
       delete players[id];
-      console.log("hiding player", id)
+      console.log('hiding player', id)
     }
   }
 }
-
 
 const updatePlayer = (player, body) => {
   player.setPosition(body.position.x, body.position.y);
@@ -32,15 +31,12 @@ const updatePlayer = (player, body) => {
   player.lastUpdated = Date.now();
 }
 
-
 /**
- * 
- * @param {string} id 
+ *
+ * @param {string} id
  * @returns {Player}
  */
-export const getPlayer = (id) => {
-  return players[id];
-}
+export const getPlayer = (id) => players[id]
 
 export default class MainScene extends Phaser.Scene {
   started = false;
@@ -59,7 +55,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
-    console.log("Creating scene")
+    console.log('Creating scene')
 
     // create the Tilemap (key matches the asset key from the loader)
     this.room = new Room(this);
@@ -81,7 +77,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   startGame() {
-    console.log("starting game")
+    console.log('starting game')
 
     // Create the player
     const userId = getClientUserId();
@@ -104,12 +100,12 @@ export default class MainScene extends Phaser.Scene {
   }
 
   stopGame() {
-    console.log("stopping game")
-  
+    console.log('stopping game')
+
     this.started = false;
     this.player.destroy();
     delete players[this.player.id];
-    console.log(this.player.id, "destroyed")
+    console.log(this.player.id, 'destroyed')
     this.player = null;
     this.inputInterval.destroy();
     this.inputInterval = null;
@@ -117,7 +113,7 @@ export default class MainScene extends Phaser.Scene {
 
   update(time, deltaTime) {
     if (!this.started) return;
-  
+
     this.player.clientInput = this.getClientInput()
     for (const id in players) {
       const player = getPlayer(id);
@@ -125,18 +121,18 @@ export default class MainScene extends Phaser.Scene {
     }
   }
 
-  handleRoomUpdate(data){
+  handleRoomUpdate(data) {
     const { bodies } = data
     for (const body of bodies) {
-      let player = getPlayer(body.label);  
+      let player = getPlayer(body.label);
       if (!player) {
-        console.log("new player", body)
+        console.log('new player', body)
         player = new Player(this, 300, 100, 'charactersheet', 0, body.label);
-        players[player.id] = player; 
+        players[player.id] = player;
       }
       updatePlayer(player, body);
     }
-  
+
     hideOldPlayers();
   }
 

@@ -2,8 +2,8 @@ const timings = {};
 
 /**
  * Measure the average time it takes to run a function over multiple calls.
- * @param {*} name 
- * @param {*} fn 
+ * @param {*} name
+ * @param {*} fn
  */
 const measureTime = (name, fn) => {
   const startMs = Date.now();
@@ -23,10 +23,10 @@ const measureTime = (name, fn) => {
 }
 
 /**
- * 
- * @param {*} name 
- * @param {*} reset 
- * @returns 
+ *
+ * @param {*} name
+ * @param {*} reset
+ * @returns
  */
 const getAverageTime = (name, reset = false) => {
   const timing = timings[name];
@@ -38,6 +38,6 @@ const getAverageTime = (name, reset = false) => {
   return avg;
 }
 
-const ROOM_ID = process.env.ROOM_ID;
+const { ROOM_ID } = process.env;
 
 export { measureTime, getAverageTime, ROOM_ID };
