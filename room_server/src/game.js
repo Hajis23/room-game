@@ -258,5 +258,5 @@ const startGame = (clientIO) => {
 }
 
 export {
-  startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas,
+  startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas, receiveObjectTransfer
 };
