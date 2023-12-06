@@ -3,6 +3,7 @@ import { Socket } from 'socket.io-client'
 
 import { measureTime, getAverageTime, ROOM_ID } from './utils.js';
 import loadTiledMap from './tiledMapParser.js';
+import { serverSockets } from './serverSocket.js';
 
 /**
  * (Someone can expand this typedef but id is enough for now.)
@@ -133,9 +134,8 @@ const transformPrimaryBodyToData = (body) => ({
 
 /**
  * @param {Socket} clientIO
- * @param {Socket[]} serverSockets
  */
-const processUpdate = (clientIO, serverSockets) => {
+const processUpdate = (clientIO) => {
   // Check if bodies are leaving the room?
 
   const primaries = Object.values(primaryObjects)
@@ -167,7 +167,7 @@ const processUpdate = (clientIO, serverSockets) => {
   }
 
   clientIO.emit('update', clientPayload);
-  serverSockets.forEach((socket) => {
+  Object.values(serverSockets).forEach((socket) => {
     // console.log("sending payload to ", socket.)
     socket.emit('update', serverPayload)
   })
@@ -221,9 +221,8 @@ const handleObjectCollision = (event) => {
 
 /**
  * @param {Socket} clientIO
- * @param {Socket[]} serverSockets
  */
-const startGame = (clientIO, serverSockets) => {
+const startGame = (clientIO) => {
   engine = Matter.Engine.create({
     gravity: {
       x: 0,
@@ -243,7 +242,7 @@ const startGame = (clientIO, serverSockets) => {
 
   const gameTick = () => {
     Matter.Engine.update(engine, tickTime);
-    processUpdate(clientIO, serverSockets);
+    processUpdate(clientIO);
   }
 
   // Run the game at 20 ticks per second
@@ -258,12 +257,6 @@ const startGame = (clientIO, serverSockets) => {
   // }, 10_000)
 }
 
-<<<<<<< HEAD
 export {
   startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas,
 };
-||||||| parent of 2e8c283 (Create object transfer func)
-export { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas };
-=======
-export { startGame, createPlayer, removePrimaryObject, setCurrentPlayerInput, updateReplicas, receiveObjectTransfer };
->>>>>>> 2e8c283 (Create object transfer func)
