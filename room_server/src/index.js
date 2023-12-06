@@ -2,6 +2,8 @@ const { Server } = require('socket.io');
 const { io: socketClient, Socket } = require("socket.io-client"); 
 const game = require('./game');
 
+const registerClientHandlers = require("./clientHandler");
+
 // A simple http server to ping:
 const http = require('http');
 const clientServer = http.createServer((req, res) => {
@@ -40,18 +42,13 @@ const client_io = new Server(clientServer, {
 
 // Connections from clients
 client_io.on('connection', (socket) => {
+  registerClientHandlers(client_io, socket);
 
   const auth = socket.handshake.auth;
   const id = auth.id;
   game.createPlayer(id);
 
   console.log('a user connected', socket.id);
-  
-  socket.on("input", (data) => {
-    setTimeout(() => { // Simulate latency
-      game.setCurrentPlayerInput(id, data);
-    }, 100)
-  });
 
   socket.on("disconnect", (reason) => {
     console.log("client disconnected", socket.id, reason);
