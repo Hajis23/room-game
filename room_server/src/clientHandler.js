@@ -9,8 +9,9 @@ export default function (io, socket) {
     const { id } = socket.handshake.auth;
 
     setTimeout(() => { // Simulate latency
+      console.log("getting input from client", id)
       setCurrentPlayerInput(id, data);
-    }, 100);
+    }, 0);
   }
 
   function disconnect(reason) {
@@ -23,7 +24,7 @@ export default function (io, socket) {
   const { auth } = socket.handshake;
   console.log('a user connected', socket.id);
 
-  createPlayer(auth.id);
+  createPlayer(auth.id, socket);
 
   socket.on('disconnect', disconnect)
   socket.on('input', input);

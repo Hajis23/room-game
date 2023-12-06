@@ -3,7 +3,7 @@ import { Socket } from 'socket.io-client'
 
 import { measureTime, getAverageTime, ROOM_ID } from './utils.js';
 import loadTiledMap from './tiledMapParser.js';
-import { serverSockets } from './serverSocket.js';
+import { broadcastServerMessage, getAddressForRoom, sendServerMessage } from './serverSocket.js';
 
 /**
  * (Someone can expand this typedef but id is enough for now.)
@@ -15,7 +15,7 @@ import { serverSockets } from './serverSocket.js';
  */
 
 /**
- * @type {{ [id: string]: Matter.Body }}
+ * @type {{ [id: string]: Matter.Body } & { clientSocket?: Socket } }}
  */
 const primaryObjects = {}
 
@@ -36,15 +36,27 @@ const updateReplicas = (payload) => {
 }
 
 /**
- * 
  * @param {string} id 
+ * @param {Socket} socket
  */
-const createPlayer = (id) => {
-  console.log('creating player', id)
+const createPlayer = (id, socket) => {
+  const existingReplica = replicatedObjects[id];
+
+  if (existingReplica) {
+    console.log('promoting replica to primary', id)
+  } else {
+    console.log('creating player', id)
+  }
+
+  const x = existingReplica?.position?.x || 300;
+  const y = existingReplica?.position?.y || 100;
+  const velocity = existingReplica?.velocity || { x: 0, y: 0 };
+  const animationState = existingReplica?.animationState || 'idle';
+  const flipX = existingReplica?.flipX || false;
 
   const player = Matter.Bodies.rectangle(
-    300,
-    100,
+    x,
+    y,
     20,
     12,
     {
@@ -54,6 +66,20 @@ const createPlayer = (id) => {
 
   // Always attach an id to primary objects
   player.id = id;
+
+  // Attach the socket to the player
+  player.clientSocket = socket;
+
+  player.animationState = animationState;
+  player.flipX = flipX;
+  player.velocity = velocity;
+
+  player.createdAt = Date.now();
+
+  if (existingReplica) {
+    player.receivedAt = Date.now();
+    delete replicatedObjects[id];
+  }
 
   primaryObjects[id] = player;
   Matter.Composite.add(engine.world, player);
@@ -123,7 +149,7 @@ let engine = null;
  * @param {Matter.Body} body
  * @returns {SerializedObject}
  */
-const transformPrimaryBodyToData = (body) => ({
+const serializePrimaryBody = (body) => ({
   position: body.position,
   velocity: body.velocity,
   label: body.label,
@@ -142,7 +168,7 @@ const processUpdate = (clientIO) => {
 
   primaries.forEach(updatePrimaryObject)
 
-  const serializedPrimaries = primaries.map(transformPrimaryBodyToData);
+  const serializedPrimaries = primaries.map(serializePrimaryBody);
 
   const replicas = Object.values(replicatedObjects)
 
@@ -167,20 +193,16 @@ const processUpdate = (clientIO) => {
   }
 
   clientIO.emit('update', clientPayload);
-  Object.values(serverSockets).forEach((socket) => {
-    // console.log("sending payload to ", socket.)
-    socket.emit('update', serverPayload)
-  })
+  broadcastServerMessage('update', serverPayload)
 }
 
 /**
  * @param {SerializedObject} body 
+ * @param {string} roomId
  * @param {Socket} roomSocket
  */
-const receiveObjectTransfer = (body, roomSocket) => {
-  const roomId = roomSocket.id;
-
-  console.log("object", body.id, "is entering room", roomId, "from room", ROOM_ID);
+const receiveObjectTransfer = (body, roomId, roomSocket) => {
+  console.log("receiving", body.id, "from", roomId);
   // Promote this body to a primary object
 
   // Acknowledge the neighbouring room server that the body has been promoted
@@ -192,13 +214,24 @@ const receiveObjectTransfer = (body, roomSocket) => {
  */
 const handleObjectTransfer = (body, roomId) => {
   const objectId = body.label;
+  if (body.isTransferring) return;
+  if (body.createdAt + 2000 > Date.now()) return;
+  if (body.receivedAt + 2000 > Date.now()) return;
+
   console.log("object", objectId, "is leaving room", ROOM_ID, "to room", roomId);
+  body.isTransferring = true;
 
   // Is this body a player? If so, tell the client to change room
+  if (body.clientSocket) {
+    const address = getAddressForRoom(roomId);
+    console.log("telling", objectId, "to change room to", address);
+    body.clientSocket.emit('changeRoom', { roomId, address });
+  }
 
   // (Is the neighbouring room server available?)
 
   // Contact the neighbouring room server and tell it to promote this body to a primary object to start simulating it
+  sendServerMessage(roomId, 'objectTransfer', serializePrimaryBody(body))
 
   // Once the neighbouring room server has promoted the body, demote it to a replica on this server
 }
@@ -246,7 +279,7 @@ const startGame = (clientIO) => {
   }
 
   // Run the game at 20 ticks per second
-  const tickTime = 1000 / 20;
+  const tickTime = 1000 / 10;
   setInterval(() => {
     measureTime("tick", gameTick);
   }, tickTime);

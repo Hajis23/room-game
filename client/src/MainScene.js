@@ -3,7 +3,7 @@ import { sendInputMessage, getClientUserId } from './socket';
 import Player from './Player';
 import Room from './Room';
 
-const serverTickRate = 1000 / 20;
+const serverTickRate = 1000 / 10;
 const clientFrameRate = 1000 / 120;
 const multiplier = serverTickRate / clientFrameRate;
 
@@ -64,6 +64,7 @@ export default class MainScene extends Phaser.Scene {
     this.sys.game.events.on('room_update', this.handleRoomUpdate, this);
     this.sys.game.events.on('start_game', this.startGame, this);
     this.sys.game.events.on('stop_game', this.stopGame, this);
+    this.sys.game.events.on('change_room', this.handleRoomChange, this);
 
     // Init keyboard controls
     this.keys = this.input.keyboard.createCursorKeys();
@@ -123,6 +124,7 @@ export default class MainScene extends Phaser.Scene {
 
   handleRoomUpdate(data) {
     const { bodies } = data
+    console.log('room update', bodies.length)
     for (const body of bodies) {
       let player = getPlayer(body.label);
       if (!player) {
@@ -144,5 +146,9 @@ export default class MainScene extends Phaser.Scene {
       right: this.keys.right.isDown,
     }
     return input;
+  }
+
+  handleRoomChange(data) {
+    console.log('room change', data)
   }
 }

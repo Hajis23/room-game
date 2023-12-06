@@ -36,5 +36,6 @@ export const stopGame = () => {
 }
 
 export const emitGameEvent = (event, payload) => {
+  // console.log('EVENT', event)
   game.events.emit(event, payload);
 }
