@@ -4,6 +4,7 @@ import { io as socketClient, Socket } from "socket.io-client";
 import { updateReplicas, startGame } from "./game.js";
 
 import registerClientHandlers from "./clientHandler.js";
+import registerServerHandlers from "./serverHandler.js";
 
 // A simple http server to ping:
 import http from 'http';
@@ -50,15 +51,7 @@ client_io.on('connection', (socket) => {
 
 // Connections from other servers
 server_io.on('connection', (socket) => {
-  console.log('a server connected', socket.id);
-
-  socket.on("update", (payload) => {
-    updateReplicas(payload)
-  })
-
-  socket.on("disconnect", (reason) => {
-    console.log("server disconnected", socket.id, reason);
-  })
+  registerServerHandlers(server_io, socket);
 });
 
 // Start the game
