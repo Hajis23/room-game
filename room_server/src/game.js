@@ -175,9 +175,11 @@ const processUpdate = (clientIO, serverSockets) => {
 
 /**
  * @param {SerializedObject} body 
- * @param {string} roomId
+ * @param {Socket} roomSocket
  */
-const receiveObjectTransfer = (body, roomId) => {
+const receiveObjectTransfer = (body, roomSocket) => {
+  const roomId = roomSocket.id;
+
   console.log("object", body.id, "is entering room", roomId, "from room", ROOM_ID);
   // Promote this body to a primary object
 
