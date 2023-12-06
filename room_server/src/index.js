@@ -1,5 +1,4 @@
 import { Server } from 'socket.io';
-import { io as socketClient } from 'socket.io-client';
 
 import http from 'http';
 import { startGame } from './game.js';
@@ -15,13 +14,6 @@ const server = http.createServer((req, res) => {
   res.end('ok');
 });
 server.listen(process.env.PORT);
-
-const { NAME } = process.env;
-const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
-
-const serverSockets = neighbourList.map(
-  (address) => socketClient(address, { auth: { type: 'room' } }),
-);
 
 const io = new Server(server, {
   cors: {
@@ -44,15 +36,6 @@ io.on('connection', (socket) => {
 });
 
 // Start the game
-startGame(io, serverSockets);
-console.log(`${NAME}, PORT = ${process.env.PORT}`)
+startGame(io);
 
-// Ping neighbours after 1 second
-setTimeout(() => neighbourList.map(async (address) => {
-  try {
-    const res = await fetch(address)
-    console.log('neighbour', address, await res.text())
-  } catch (e) {
-    console.error('neighbour', address, e)
-  }
-}), 1000)
+console.log(`${process.env.NAME}, PORT = ${process.env.PORT}`)

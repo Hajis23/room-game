@@ -3,10 +3,15 @@ import { Socket } from 'socket.io-client'
 
 import { measureTime, getAverageTime, ROOM_ID } from './utils.js';
 import loadTiledMap from './tiledMapParser.js';
+import { serverSockets } from './serverSocket.js';
 
 /**
  * (Someone can expand this typedef but id is enough for now.)
  * @typedef {{ id: string }} SerializedObject
+ */
+
+/**
+ * @typedef {{ up: boolean, down: boolean, left: boolean, right: boolean }} Input
  */
 
 /**
@@ -30,6 +35,10 @@ const updateReplicas = (payload) => {
   })
 }
 
+/**
+ * 
+ * @param {string} id 
+ */
 const createPlayer = (id) => {
   console.log('creating player', id)
 
@@ -50,6 +59,12 @@ const createPlayer = (id) => {
   Matter.Composite.add(engine.world, player);
 }
 
+/**
+ * 
+ * @param {string} id 
+ * @param {Input} input 
+ * @returns 
+ */
 const setCurrentPlayerInput = (id, input) => {
   if (!primaryObjects[id]) return;
 
@@ -66,7 +81,10 @@ const setCurrentPlayerInput = (id, input) => {
   }
 }
 
-const updatePrimaryObjects = (body) => {
+/**
+ * @param {Matter.Body} body 
+ */
+const updatePrimaryObject = (body) => {
   Matter.Body.setAngularVelocity(body, 0);
 
   if (body.currentInput) {
@@ -86,6 +104,9 @@ const updatePrimaryObjects = (body) => {
   }
 }
 
+/**
+ * @param {string} id 
+ */
 const removePrimaryObject = (id) => {
   if (!primaryObjects[id]) return
   Matter.Composite.remove(engine.world, primaryObjects[id])
@@ -113,14 +134,13 @@ const transformPrimaryBodyToData = (body) => ({
 
 /**
  * @param {Socket} clientIO
- * @param {Socket[]} serverSockets
  */
-const processUpdate = (clientIO, serverSockets) => {
+const processUpdate = (clientIO) => {
   // Check if bodies are leaving the room?
 
   const primaries = Object.values(primaryObjects)
 
-  primaries.forEach(updatePrimaryObjects)
+  primaries.forEach(updatePrimaryObject)
 
   const serializedPrimaries = primaries.map(transformPrimaryBodyToData);
 
@@ -147,17 +167,62 @@ const processUpdate = (clientIO, serverSockets) => {
   }
 
   clientIO.emit('update', clientPayload);
-  serverSockets.forEach((socket) => {
+  Object.values(serverSockets).forEach((socket) => {
     // console.log("sending payload to ", socket.)
     socket.emit('update', serverPayload)
   })
 }
 
 /**
- * @param {Socket} clientIO
- * @param {Socket[]} serverSockets
+ * @param {SerializedObject} body 
+ * @param {Socket} roomSocket
  */
-const startGame = (clientIO, serverSockets) => {
+const receiveObjectTransfer = (body, roomSocket) => {
+  const roomId = roomSocket.id;
+
+  console.log("object", body.id, "is entering room", roomId, "from room", ROOM_ID);
+  // Promote this body to a primary object
+
+  // Acknowledge the neighbouring room server that the body has been promoted
+}
+
+/**
+ * @param {Matter.Body} body 
+ * @param {string} roomId
+ */
+const handleObjectTransfer = (body, roomId) => {
+  const objectId = body.label;
+  console.log("object", objectId, "is leaving room", ROOM_ID, "to room", roomId);
+
+  // Is this body a player? If so, tell the client to change room
+
+  // (Is the neighbouring room server available?)
+
+  // Contact the neighbouring room server and tell it to promote this body to a primary object to start simulating it
+
+  // Once the neighbouring room server has promoted the body, demote it to a replica on this server
+}
+
+/**
+ * @param {{ pairs: { bodyA: Matter.Body, bodyB: Matter.Body }[] }} event 
+ */
+const handleObjectCollision = (event) => {
+  const pairs = event.pairs;
+  // Is one of the bodies neighbouring room?
+  pairs.forEach((pair) => {
+    const { bodyA, bodyB } = pair;
+    if (bodyA.label.startsWith("room") && bodyA.label !== ROOM_ID) {
+      handleObjectTransfer(bodyB, bodyA.label);
+    } else if (bodyB.label.startsWith("room") && bodyB.label !== ROOM_ID) {
+      handleObjectTransfer(bodyA, bodyB.label);
+    }
+  });
+}
+
+/**
+ * @param {Socket} clientIO
+ */
+const startGame = (clientIO) => {
   engine = Matter.Engine.create({
     gravity: {
       x: 0,
@@ -173,26 +238,17 @@ const startGame = (clientIO, serverSockets) => {
     Matter.Composite.add(engine.world, object);
   });
 
-  Matter.Events.on(engine, 'collisionStart', (event) => {
-    const { pairs } = event;
-    // Is one of the bodies neighbouring room?
-    pairs.forEach((pair) => {
-      const { bodyA, bodyB } = pair;
-      if (bodyA.label.startsWith('room') && bodyA.label !== ROOM_ID) {
-        console.log('player entered', bodyA.label);
-      } else if (bodyB.label.startsWith('room') && bodyB.label !== ROOM_ID) {
-        console.log('player entered', bodyB.label);
-      }
-    });
-  });
+  Matter.Events.on(engine, 'collisionStart', handleObjectCollision);
+
+  const gameTick = () => {
+    Matter.Engine.update(engine, tickTime);
+    processUpdate(clientIO);
+  }
 
   // Run the game at 20 ticks per second
   const tickTime = 1000 / 20;
   setInterval(() => {
-    measureTime('tick', () => {
-      Matter.Engine.update(engine, tickTime);
-      processUpdate(clientIO, serverSockets);
-    });
+    measureTime("tick", gameTick);
   }, tickTime);
 
   // Log the tick time every 10 seconds
