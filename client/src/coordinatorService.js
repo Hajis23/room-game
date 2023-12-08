@@ -24,13 +24,22 @@ function checkUsername(username) {
   });
 }
 
+function logoutFromCoordinator(){
+  return new Promise((resolve) => {
+    socket.emit('logout', (response, respond) => {
+      console.log("logout")
+      resolve()
+    });
+  });
+}
+
 function useCoordinator() {
   useEffect(() => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
   }, []);
 
-  return [ checkUsername, status ];
+  return [ checkUsername, logoutFromCoordinator, status ];
 }
 
 export default useCoordinator;

@@ -19,10 +19,25 @@ const io = new Server(server, {
 });
 
 const users = [];
+const socketIdToUser = {};
+
+const deleteUserBySocketId = (socketId)  => {
+  if(socketIdToUser[socketId]){
+    const id = users.indexOf(socketIdToUser[socketId]);
+    users.splice(id, 1);
+    delete socketIdToUser[socketId];
+  }
+}
 
 io.on('connection', (socket) => {
+  
   socket.on('disconnect', (reason) => {
     console.log('disconnect');
+    deleteUserBySocketId(socket.id);
+  });
+
+  socket.on('logout', () => {
+    deleteUserBySocketId(socket.id);
   });
 
   socket.on('check', (username, callback) => {
@@ -32,6 +47,7 @@ io.on('connection', (socket) => {
     } else {
       console.log("valid");
       users.push(username);
+      socketIdToUser[socket.id] = username;
       callback({ invalid: false });
     }
   });

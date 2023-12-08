@@ -7,7 +7,7 @@ import useCoordinator from './coordinatorService';
 
 const App = () => {
   const [authenticated, setAuthenticated] = useState(false);
-  const [ checkUsername ] = useCoordinator();
+  const [ checkUsername, logoutFromCoordinator ] = useCoordinator();
 
   function login(address, username) {
     checkUsername(username).then(({invalid}) => {
@@ -21,6 +21,7 @@ const App = () => {
   }
 
   function logout() {
+    logoutFromCoordinator();
     setAuthenticated(false);
     stopGame();
   }
