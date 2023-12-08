@@ -1,0 +1,1 @@
+SERVERS={ "room1":"localhost:3000", "room2":"localhost:4000", "room3":"localhost:4003", "fly.io": "wss://hajis-room-game-withered-dream-842.fly.dev/" }

@@ -50,6 +50,7 @@ services:
       context: ../coordinator
       dockerfile: ../coordinator/Dockerfile
     image: coordinator 
+    env_file: ./env/coordinator
     volumes:
       - ../coordinator/:/usr/src/app
         #env_file: ./env/server3

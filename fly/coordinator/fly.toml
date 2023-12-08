@@ -1,0 +1,33 @@
+# fly.toml app configuration file generated for hajis-room-game-withered-dream-842 on 2023-12-08T13:08:53+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "hajis-room-game-coordinator"
+primary_region = "arn"
+
+[build]
+  image = "veikmaster/room_game_coordinator:latest"
+
+[deploy]
+  strategy = "immediate"
+
+[env]
+  PORT="8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = false
+  min_machines_running = 1
+  max_machines_running = 1
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024

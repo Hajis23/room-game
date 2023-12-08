@@ -5,8 +5,8 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"start": "vite",
-		"build": "vite build",
+		"start": "NODE_ENV=development vite",
+		"build": "NODE_ENV=production vite build",
 		"preview": "vite preview"
 	},
 	"devDependencies": {

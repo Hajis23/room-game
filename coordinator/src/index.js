@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import http from 'http';
 
-const port = 3131;
+const port = process.env.PORT || 3131;
 
 const server = http.createServer((req, res) => {
   console.log('ping')
@@ -21,12 +21,7 @@ const io = new Server(server, {
 const users = [];
 const socketIdToUser = {};
 
-const roomServers = {
-  "room1":"localhost:3000",
-  "room2":"localhost:4000",
-  "room3":"localhost:4003",
-  "fly.io" : "wss://hajis-room-game-withered-dream-842.fly.dev/",
-};
+const roomServers = JSON.parse(process.env.SERVERS)
 
 const deleteUserBySocketId = (socketId)  => {
   if(socketIdToUser[socketId]){
