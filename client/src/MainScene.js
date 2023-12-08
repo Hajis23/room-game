@@ -50,7 +50,7 @@ export default class MainScene extends Phaser.Scene {
    */
   preload() {
     this.load.image('tilesheet', 'assets/Tileset.png');
-    this.load.tilemapTiledJSON('tilemap', 'assets/base.json');
+    this.load.tilemapTiledJSON('tilemap', 'assets/base2.json');
     this.load.spritesheet('charactersheet', 'assets/playerSpriteSheet.png', { frameWidth: 47, frameHeight: 53 });
   }
 

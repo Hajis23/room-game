@@ -668,7 +668,7 @@
                 {
                  "height":378.181818181819,
                  "id":68,
-                 "name":"",
+                 "name":"room1",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -679,7 +679,7 @@
                 {
                  "height":192.060606060606,
                  "id":69,
-                 "name":"",
+                 "name":"room2",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -690,7 +690,7 @@
                 {
                  "height":317.090909090909,
                  "id":70,
-                 "name":"",
+                 "name":"room3",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -899,7 +899,7 @@
                 }],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }, 
@@ -910,7 +910,7 @@
          "objects":[],
          "opacity":1,
          "type":"objectgroup",
-         "visible":false,
+         "visible":true,
          "x":0,
          "y":0
         }],

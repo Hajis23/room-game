@@ -3,7 +3,7 @@ import Matter from 'matter-js';
 import { ROOM_ID } from './utils.js';
 import logger from './logger.js';
 
-import mapJSON from "../base.json" with { type: "json" };
+import mapJSON from "../base2.json" with { type: "json" };
 
 const loadTiledMap = () => {
 
