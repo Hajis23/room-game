@@ -30,6 +30,16 @@ const primaryObjects = {}
 const replicatedObjects = {};
 
 /**
+ * Objects cannot be transferred more often than this
+ */
+const ROOM_TRANSFER_COOLDOWN_MS = 4000;
+
+/**
+ * Replica expiration time
+ */
+const REPLICA_EXPIRATION_MS = 1000;
+
+/**
  *
  * @param {{ timestamp: number, bodies: SerializedObject[] }} payload
  */
@@ -162,7 +172,7 @@ const processUpdate = (clientIO) => {
   // Remove expired replicas
   const now = Date.now()
   replicas.forEach((replica) => {
-    if (now - replica.lastUpdated > 1000) {
+    if (now > replica.lastUpdated + REPLICA_EXPIRATION_MS) {
       delete replicas[replica.id]
     }
   })
@@ -235,8 +245,8 @@ const receiveObjectTransfer = (bodyPayload, roomId, roomSocket) => {
  */
 const handleObjectTransfer = (body, roomId) => {
   if (body.isTransferring) return;
-  if (body.createdAt + 2000 > Date.now()) return;
-  if (body.receivedAt + 2000 > Date.now()) return;
+  if (body.createdAt + ROOM_TRANSFER_COOLDOWN_MS > Date.now()) return;
+  if (body.receivedAt + ROOM_TRANSFER_COOLDOWN_MS > Date.now()) return;
 
   logger.tag(body.id).info("transferring to", roomId);
   body.isTransferring = true;
@@ -308,10 +318,10 @@ const startGame = (clientIO) => {
     measureTime("tick", gameTick);
   }, tickTime);
 
-  // Log the tick time every 10 seconds
-  // setInterval(() => {
-  //   logger.info("ticktime:", getAverageTime("tick", true), "ms")
-  // }, 10_000)
+  // Log the tick time every 30 seconds
+  setInterval(() => {
+    logger.tag('PERF').info("ticktime:", getAverageTime("tick", true), "ms")
+  }, 30_000)
 }
 
 export {
