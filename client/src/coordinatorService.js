@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 
 import io from 'socket.io-client';
+import { inDevelopment } from './config';
 
-const url = 'localhost:3131';
+const url = inDevelopment ? 'localhost:3131' : 'wss://hajis-room-game-coordinator.fly.dev/';
 
-const socket = io(url);
+const socket = io(url, {
+  transports: ['websocket'],
+});
 
 function onConnect() {
   console.log('- connect');

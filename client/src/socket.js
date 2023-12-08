@@ -1,8 +1,6 @@
 import io, { Socket } from 'socket.io-client'
 import { emitGameEvent } from './PhaserGame';
-
-const inProduction = import.meta.env.MODE === 'production';
-console.log('VITE MODE: ', import.meta.env.MODE)
+import { inDevelopment } from './config';
 
 const socketState = {
   socket: null,
@@ -40,7 +38,7 @@ const addHandlers = (socket) => {
     getSocket().disconnect();
 
     let newAddress = data.address;
-    if (!inProduction) {
+    if (inDevelopment) {
       // Hack in local development, only use the port from the address
       newAddress = `http://localhost:${new URL(data.address).port}`;
     }

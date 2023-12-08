@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for hajis-room-game-withered-dream-842 on 2023-12-08T13:08:53+02:00
+# fly.toml app configuration file generated for room3 on 2023-12-08T15:38:27+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "hajis-room-game-withered-dream-842"
+app = "room3"
 primary_region = "arn"
 
 [build]
@@ -13,10 +13,10 @@ primary_region = "arn"
   strategy = "immediate"
 
 [env]
-  NAME = "server2"
-  OTHER_SERVERS = "[{ \"address\": \"server1:3000\", \"id\": \"room1\" }, { \"address\": \"server3:5000\", \"id\": \"room3\" }]"
+  NAME = "server3"
+  OTHER_SERVERS = "[{ \"address\": \"hajis-room-game-withered-dream-842.fly.dev/\", \"id\": \"room1\" }, { \"address\": \"room2.fly.dev\", \"id\": \"room2\" }]"
   PORT = "8080"
-  ROOM_ID = "room2"
+  ROOM_ID = "room3"
 
 [http_service]
   internal_port = 8080
