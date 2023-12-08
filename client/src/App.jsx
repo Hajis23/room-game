@@ -10,9 +10,14 @@ const App = () => {
   const [ checkUsername ] = useCoordinator();
 
   function login(address, username) {
-    checkUsername(username)
-    setAuthenticated(true);
-    startGame(address, username);
+    checkUsername(username).then(({invalid}) => {
+      if(invalid){
+        alert("Username is already taken");
+      }else{
+        setAuthenticated(true);
+        startGame(address, username);
+      }
+    });
   }
 
   function logout() {

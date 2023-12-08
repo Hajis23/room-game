@@ -15,12 +15,12 @@ function onDisconnect() {
 }
 
 function checkUsername(username) {
-  socket.emit('check', username, (err, response) => {
-    if (err) {
-      console.error(err);
-    }
-
-    console.log(response);
+  return new Promise((resolve) => {
+    socket.emit('check', username, (response, respond) => {
+      if (response) {
+        resolve(response);
+      }
+    });
   });
 }
 
