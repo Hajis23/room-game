@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import io from 'socket.io-client';
 
@@ -33,13 +33,24 @@ function logoutFromCoordinator(){
   });
 }
 
+function requestRoomServers(){
+  return new Promise((resolve) => {
+    socket.emit('get_room_servers', (response, respond) => {
+      resolve(response)
+    });
+  });
+}
+
 function useCoordinator() {
+  const [roomServers, setRoomServers] = useState({});
   useEffect(() => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
+
+    requestRoomServers().then(servers => setRoomServers(servers));
   }, []);
 
-  return [ checkUsername, logoutFromCoordinator, status ];
+  return [ checkUsername, logoutFromCoordinator, roomServers, status ];
 }
 
 export default useCoordinator;

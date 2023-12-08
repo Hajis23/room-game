@@ -21,6 +21,12 @@ const io = new Server(server, {
 const users = [];
 const socketIdToUser = {};
 
+const roomServers = {
+  "room1":"localhost:3000",
+  "room2":"localhost:4000",
+  "room3":"localhost:5000",
+};
+
 const deleteUserBySocketId = (socketId)  => {
   if(socketIdToUser[socketId]){
     const id = users.indexOf(socketIdToUser[socketId]);
@@ -50,6 +56,10 @@ io.on('connection', (socket) => {
       socketIdToUser[socket.id] = username;
       callback({ invalid: false });
     }
+  });
+
+  socket.on('get_room_servers', (respond) => {
+    respond(roomServers);
   });
 
   console.log('connection');
