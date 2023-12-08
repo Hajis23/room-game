@@ -49,3 +49,16 @@ services:
     ports:
       - 5005:5000
       - 5001:5001
+
+  coordinator:
+    build:
+      context: ../coordinator
+      dockerfile: ../coordinator/Dockerfile
+    image: coordinator 
+    volumes:
+      - ../coordinator/:/usr/src/app
+        #env_file: ./env/server3
+    expose:
+      - 3131
+    ports:
+      - 3131:3131
