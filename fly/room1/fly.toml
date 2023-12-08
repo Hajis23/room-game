@@ -13,10 +13,10 @@ primary_region = "arn"
   strategy = "immediate"
 
 [env]
-  NAME = "server2"
-  OTHER_SERVERS = "[{ \"address\": \"http://server1:3000\", \"id\": \"room1\" }, { \"address\": \"http://server3:5000\", \"id\": \"room3\" }]"
+  NAME = "server1"
+  OTHER_SERVERS = "[{ \"address\": \"room2.fly.dev/\", \"id\": \"room2\" }, { \"address\": \"server3:5000\", \"id\": \"room3\" }]"
   PORT = "8080"
-  ROOM_ID = "room2"
+  ROOM_ID = "room1"
 
 [http_service]
   internal_port = 8080
@@ -24,6 +24,7 @@ primary_region = "arn"
   auto_stop_machines = false
   auto_start_machines = false
   min_machines_running = 1
+  max_machines_running = 1
   [http_service.concurrency]
     type = "requests"
     hard_limit = 250

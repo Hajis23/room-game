@@ -14,7 +14,7 @@ primary_region = "arn"
 
 [env]
   NAME = "server2"
-  OTHER_SERVERS = "[{ \"address\": \"http://server1:3000\", \"id\": \"room1\" }, { \"address\": \"http://server3:5000\", \"id\": \"room3\" }]"
+  OTHER_SERVERS = "[{ \"address\": \"server1:3000\", \"id\": \"room1\" }, { \"address\": \"server3:5000\", \"id\": \"room3\" }]"
   PORT = "8080"
   ROOM_ID = "room2"
 

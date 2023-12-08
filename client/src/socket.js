@@ -36,10 +36,8 @@ const addHandlers = (socket) => {
   socket.on('changeRoom', (data) => {
     getSocket().disconnect();
 
-    // Temp hack: only use the port from address
-    const port = data.address.split(':')[2];
-    const newAddress = `localhost:${port}`;
-    console.log('Connecting to new room server:', newAddress)
+    const newAddress = data.address;
+    console.log('connecting to', newAddress);
 
     setSocket(createSocket(newAddress, clientUserId));
   

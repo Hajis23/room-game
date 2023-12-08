@@ -1,5 +1,4 @@
 PORT=4000
 NAME=server2
 ROOM_ID=room2
-VITE_ADDRESS=http://localhost:8000
-OTHER_SERVERS=[{ "address": "http://server1:3000", "id": "room1" }, { "address": "http://server3:4003", "id": "room3" }]
+OTHER_SERVERS=[{ "address": "server1:3000", "id": "room1" }, { "address": "server3:4003", "id": "room3" }]

@@ -6,17 +6,29 @@ import logger from "./logger.js";
  */
 const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
 
+const inProduction = process.env.NODE_ENV === 'production';
+
+const toHttpAddress = (address) => {
+  // Address has no protocol, add it.
+  return inProduction ? `https://${address}` : `http://${address}`;
+}
+
+const toWsAddress = (address) => {
+  // Address has no protocol, add it.
+  return inProduction ? `wss://${address}` : `ws://${address}`;
+}
+
 /**
  * @type {{ [id: string]: Socket }}
  */
 const serverSockets = Object.fromEntries(
-  neighbourList.map(({ id, address }) => [id, io(address, { auth: { roomId: process.env.ROOM_ID, type: 'room' } })])
+  neighbourList.map(({ id, address }) => [id, io(toWsAddress(address), { auth: { roomId: process.env.ROOM_ID, type: 'room' } })])
 )
 
 export const getAddressForRoom = (roomId) => {
   const neighbour = neighbourList.find(({ id }) => id === roomId)
   if (!neighbour) throw new Error(`No neighbour found for room ${roomId}`)
-  return neighbour.address
+  return toWsAddress(neighbour.address)
 }
 
 export const broadcastServerMessage = (type, payload) => {
@@ -38,7 +50,7 @@ export const sendServerMessage = (roomId, type, payload) => {
 // Ping neighbours after 1 second
 setTimeout(() => neighbourList.map(async ({ address }) => {
   try {
-    const res = await fetch(address)
+    const res = await fetch(toHttpAddress(address))
     logger.info('neighbour', address, await res.text())
   } catch (e) {
     console.error('neighbour', address, e)
