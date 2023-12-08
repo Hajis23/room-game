@@ -22,6 +22,7 @@ const createSocket = (address, userId) => {
       type: 'user',
       id: userId,
     },
+    transports: ['websocket'],
   });
 }
 

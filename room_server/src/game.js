@@ -55,7 +55,7 @@ const connectPlayer = (id, socket) => {
   if (isNewPlayer) {
     // New player
     logger.tag(id).info('creating new player')
-    player = createPrimaryObject({ id, position: { x: 300, y: 100 }, animationState: 'idle', flipX: false });
+    player = createPrimaryObject({ id, position: { x: 640, y: 483 }, animationState: 'idle', flipX: false });
 
   } else if (existingReplica && !existingPrimary) {
     // Existing replica but need to promote to primary

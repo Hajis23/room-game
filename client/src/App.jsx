@@ -35,7 +35,7 @@ const App = () => {
 
 function Login({login}) {
   const [username, setUsername] = useState("");
-  const addresses = ["localhost:3000", "localhost:4000", "localhost:5000"]
+  const addresses = ["localhost:3000", "localhost:4000", "localhost:5000", "wss://hajis-room-game-withered-dream-842.fly.dev/"]
   const [serverAddress, setServerAddress] = useState(addresses[0]);
 
   function handleChange(event) {
