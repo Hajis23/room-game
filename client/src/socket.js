@@ -1,4 +1,4 @@
-import io from 'socket.io-client'
+import io from 'socket.io-client';
 import { emitGameEvent } from './PhaserGame';
 
 let socket = null;

@@ -1,12 +1,16 @@
-import './PhaserGame'
-import './App.css'
+import './PhaserGame';
+import './App.css';
 import { startGame, stopGame } from './PhaserGame';
 import {useState} from 'react';
 
+import useCoordinator from './coordinatorService';
+
 const App = () => {
   const [authenticated, setAuthenticated] = useState(false);
+  const [ checkUsername ] = useCoordinator();
 
   function login(address, username) {
+    checkUsername(username)
     setAuthenticated(true);
     startGame(address, username);
   }
