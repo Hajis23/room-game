@@ -5,7 +5,7 @@ services:
   server1:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     image: room_server
     volumes:
       - ./:/usr/src/app
@@ -21,7 +21,7 @@ services:
   server2:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     image: room_server
     volumes:
       - ./:/usr/src/app
@@ -37,7 +37,7 @@ services:
   server3:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dev.Dockerfile
     # network_mode: "host"
     image: room_server
     volumes:
@@ -47,5 +47,5 @@ services:
       - 5000
       - 5001
     ports:
-      - 5005:5000
+      - 5000:5000
       - 5001:5001
