@@ -32,7 +32,7 @@ const replicatedObjects = {};
 /**
  * Objects cannot be transferred more often than this
  */
-const ROOM_TRANSFER_COOLDOWN_MS = 4000;
+const ROOM_TRANSFER_COOLDOWN_MS = 3000;
 
 /**
  * Replica expiration time
@@ -248,7 +248,7 @@ const receiveObjectTransfer = (bodyPayload, roomId, roomSocket) => {
   const primaryObject = createPrimaryObject(bodyPayload);
 
   // Dead reckoning
-  const deltaTime = (Date.now() - bodyPayload.sentAt);
+  const deltaTime = (Date.now() - bodyPayload.sentAt) * (1 / Matter.Body._baseDelta);
   const dx = deltaTime * bodyPayload.velocity.x;
   const dy = deltaTime * bodyPayload.velocity.y;
   Matter.Body.setPosition(primaryObject, Matter.Vector.add(primaryObject.position, { x: dx, y: dy}))
