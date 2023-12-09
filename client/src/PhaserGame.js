@@ -16,7 +16,7 @@ const game = new Phaser.Game({
   physics: {
     default: 'matter',
     matter: {
-      debug: false,
+      debug: true,
       gravity: {
         y: 0,
       }
@@ -36,6 +36,10 @@ export const stopGame = () => {
   game.scene.switch('main', 'login');
   disconnectRoomServer();
   game.events.emit('stop_game');
+}
+
+export const setDebug = (isDebug) => {
+  game.scene.getScene('main').setDebug(isDebug);
 }
 
 export const emitGameEvent = (event, payload) => {

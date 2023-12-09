@@ -1,11 +1,12 @@
 import './PhaserGame';
 import './App.css';
-import { startGame, stopGame } from './PhaserGame';
+import { setDebug, startGame, stopGame } from './PhaserGame';
 import {useState} from 'react';
 
 import useCoordinator from './coordinatorService';
 
 const App = () => {
+  const [debug, setDebugState] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [ checkUsername, logoutFromCoordinator, roomServers ] = useCoordinator();
 
@@ -16,6 +17,7 @@ const App = () => {
         alert("Username is already taken");
       }else{
         setAuthenticated(true);
+        setDebug(debug);
         startGame(address, username);
       }
     });
@@ -27,15 +29,25 @@ const App = () => {
     stopGame();
   }
 
+  function handleToggleDebug() {
+    setDebugState(!debug);
+    setDebug(!debug);
+  }
+
   return (
     <div>
       <div id="phaser-container"></div>
       <div id="ui-container">
         <h1>Room game</h1>
         {authenticated ? (
-        <button onClick={logout}>
-          Logout
-        </button>
+          <div>
+            <button onClick={logout}>
+              Logout
+            </button>
+            <button onClick={handleToggleDebug}>
+              {debug ? "Debug on" : "Debug off"}
+            </button>
+          </div>
         ) : (
           <Login login={login} addresses={roomServers}/>
         )}

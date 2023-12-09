@@ -206,8 +206,8 @@ const createPrimaryObject = (bodyPayload) => {
   const body = Matter.Bodies.rectangle(
     bodyPayload.position.x,
     bodyPayload.position.y,
-    20,
-    12,
+    10,
+    14,
     {
       isStatic: false, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100,
     },

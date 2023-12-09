@@ -52,8 +52,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
     // Add physics
     this.body = scene.matter.add.gameObject(this, {
       shape: 'rectangle',
-      width: 20,
-      height: 12,
+      width: 10,
+      height: 14,
       // offset: { x: 14, y: 40 },
       mass: 100,
       frictionAir: 0.5,

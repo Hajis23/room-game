@@ -154,4 +154,9 @@ export default class MainScene extends Phaser.Scene {
   handleRoomChange(data) {
     console.log('room change', data)
   }
+
+  setDebug(isDebug) {
+    this.matter.world.debugGraphic.visible = isDebug;
+    console.log('debug', isDebug)
+  }
 }
