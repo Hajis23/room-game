@@ -96,8 +96,16 @@ const connectPlayer = (id, socket) => {
  */
 const setCurrentPlayerInput = (id, input) => {
   if (!primaryObjects[id]) return;
+  const currentInput = primaryObjects[id].currentInput;
 
-  primaryObjects[id].currentInput = input;
+  const newInput = {
+    up: input.up ?? currentInput?.up ?? false,
+    down: input.down ?? currentInput?.down ?? false,
+    left: input.left ?? currentInput?.left ?? false,
+    right: input.right ??  currentInput?.right ?? false,
+  }
+
+  primaryObjects[id].currentInput = newInput;
   if (Object.values(input).some((v) => v)) {
     primaryObjects[id].animationState = 'walk';
     if (input.left) {

@@ -70,6 +70,16 @@ export default class MainScene extends Phaser.Scene {
     // Init keyboard controls
     this.keys = this.input.keyboard.createCursorKeys();
 
+    // Send input messages to server
+    Object.keys(this.keys).forEach((key) => {
+      this.keys[key].on('down', () => {
+        sendInputMessage({ [key]: true });
+      })
+      this.keys[key].on('up', () => {
+        sendInputMessage({ [key]: false });
+      })
+    })
+
     // Init camera
     this.cameras.main.setBounds(0, 0, this.room.widthInPixels, this.room.heightInPixels);
     this.cameras.main.setZoom(6);
@@ -89,18 +99,6 @@ export default class MainScene extends Phaser.Scene {
     this.cameras.main.fadeIn()
     this.cameras.main.startFollow(this.player, false, 0.1, 0.1);
     this.started = true;
-
-    // Send input messages to server every 100ms. Save the timer so we can for example cancel it later.
-    this.inputInterval = this.time.addEvent({
-      callback: () => {
-        const input = this.getClientInput()
-        // We could optimize this in many ways, for example not sending message if input is same as last time
-        sendInputMessage(input);
-      },
-      callbackScope: this,
-      delay: 100,
-      loop: true,
-    });
   }
 
   stopGame() {
@@ -111,8 +109,6 @@ export default class MainScene extends Phaser.Scene {
     delete players[this.player.id];
     console.log(this.player.id, 'destroyed')
     this.player = null;
-    this.inputInterval.destroy();
-    this.inputInterval = null;
   }
 
   update(time, deltaTime) {
