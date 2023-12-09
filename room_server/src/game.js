@@ -185,7 +185,7 @@ const processUpdate = (clientIO) => {
   const now = Date.now()
   replicas.forEach((replica) => {
     if (now > replica.lastUpdated + REPLICA_EXPIRATION_MS) {
-      delete replicas[replica.id]
+      delete replicatedObjects[replica.id]
     }
   })
 
