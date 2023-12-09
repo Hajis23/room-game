@@ -1,11 +1,10 @@
 import Phaser from 'phaser';
+import Matter from 'matter-js';
 import { sendInputMessage, getClientUserId } from './socket';
 import Player from './Player';
 import Room from './Room';
 
-const serverTickRate = 1000 / 10;
-const clientFrameRate = 1000 / 120;
-const multiplier = serverTickRate / clientFrameRate;
+const multiplier = 1000/20;
 
 const players = {
 
@@ -24,7 +23,9 @@ const hideOldPlayers = () => {
 }
 
 const updatePlayer = (player, body) => {
-  player.setPosition(body.position.x, body.position.y);
+  Matter.Body.setPosition(player.serverTrackingBody, body.position);
+  // Matter.Body.setVelocity(player.serverTrackingBody, body.velocity);
+
   // player.setVelocity(body.velocity.x * multiplier, body.velocity.y * multiplier);
   player.animationState = body.animationState;
   if (!player.isClientPlayer) player.flipX = body.flipX;
@@ -82,10 +83,11 @@ export default class MainScene extends Phaser.Scene {
 
     // Create the player
     const userId = getClientUserId();
-    this.player = new Player(this, 300, 100, 'charactersheet', 0, userId, true);
+    this.player = new Player(this, 640, 483, 'charactersheet', 0, userId, true);
     players[this.player.id] = this.player;
     console.log('created player', this.player.id)
-    this.cameras.main.startFollow(this.player);
+    this.cameras.main.fadeIn()
+    this.cameras.main.startFollow(this.player, false, 0.1, 0.1);
     this.started = true;
 
     // Send input messages to server every 100ms. Save the timer so we can for example cancel it later.
@@ -129,9 +131,10 @@ export default class MainScene extends Phaser.Scene {
       let player = getPlayer(body.id);
 
       if (!player) {
-        player = new Player(this, 300, 100, 'charactersheet', 0, body.id);
+        player = new Player(this, body.position.x, body.position.y, 'charactersheet', 0, body.id, false, new Phaser.Math.Vector2(body.position.x, body.position.y));
         players[player.id] = player;
       }
+
       updatePlayer(player, body);
     }
 

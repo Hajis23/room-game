@@ -14,10 +14,13 @@ const game = new Phaser.Game({
   },
   pixelArt: true,
   physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 0 },
-    },
+    default: 'matter',
+    matter: {
+      debug: false,
+      gravity: {
+        y: 0,
+      }
+    }
   },
   scene: [LoginScene, MainScene],
 });

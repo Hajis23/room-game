@@ -40,6 +40,11 @@ const ROOM_TRANSFER_COOLDOWN_MS = 4000;
 const REPLICA_EXPIRATION_MS = 1000;
 
 /**
+ * Run the game at 20 ticks per second
+ */ 
+const TICK_TIME_MS = 1000 / 20;
+
+/**
  *
  * @param {{ timestamp: number, bodies: SerializedObject[] }} payload
  */
@@ -75,7 +80,7 @@ const connectPlayer = (id, socket) => {
 
   } else if (existingPrimary) {
     // Existing primary, usual case when reconnecting or being transferred
-    logger.tag(id).info('connecting existing primary')
+    logger.tag(id).info('client connecting to primary (delta =', Date.now() - existingPrimary.sentAt, "ms)")
     player = existingPrimary;
   }
 
@@ -149,9 +154,10 @@ let engine = null;
  */
 const serializePrimaryBody = (body) => ({
   position: body.position,
-  velocity: body.velocity,
+  velocity: Matter.Body.getVelocity(body),
   animationState: body.animationState,
   flipX: body.flipX,
+  sentAt: body.sentAt ?? Date.now(),
   id: body.id,
 })
 
@@ -162,8 +168,6 @@ const processUpdate = (clientIO) => {
   // Check if bodies are leaving the room?
 
   const primaries = Object.values(primaryObjects)
-
-  primaries.forEach(updatePrimaryObject)
 
   const serializedPrimaries = primaries.map(serializePrimaryBody);
 
@@ -190,7 +194,9 @@ const processUpdate = (clientIO) => {
   }
 
   clientIO.emit('update', clientPayload);
-  broadcastServerMessage('update', serverPayload)
+  broadcastServerMessage('update', serverPayload);
+
+  primaries.forEach(updatePrimaryObject);
 }
 
 /**
@@ -208,11 +214,13 @@ const createPrimaryObject = (bodyPayload) => {
   );
 
   body.id = bodyPayload.id;
-  body.velocity = bodyPayload.velocity || { x: 0, y: 0 };
+  Matter.Body.setVelocity(body, bodyPayload.velocity || { x: 0, y: 0 });
   body.createdAt = Date.now();
   body.receivedAt = Date.now();
+  body.sentAt = bodyPayload.sentAt;
   body.animationState = bodyPayload.animationState;
   body.flipX = bodyPayload.flipX;
+  body.currentInput = bodyPayload.currentInput
 
   primaryObjects[body.id] = body;
 
@@ -227,14 +235,22 @@ const createPrimaryObject = (bodyPayload) => {
  * @param {Socket} roomSocket
  */
 const receiveObjectTransfer = (bodyPayload, roomId, roomSocket) => {
-  logger.tag(bodyPayload.id).info("received from", roomId);
 
   // Promote this body to a primary object
   const primaryObject = createPrimaryObject(bodyPayload);
 
+  // Dead reckoning
+  const deltaTime = (Date.now() - bodyPayload.sentAt);
+  const dx = deltaTime * bodyPayload.velocity.x;
+  const dy = deltaTime * bodyPayload.velocity.y;
+  Matter.Body.setPosition(primaryObject, Matter.Vector.add(primaryObject.position, { x: dx, y: dy}))
+
+  // Remove replica of this object
   if (replicatedObjects[primaryObject.id]) {
     delete replicatedObjects[primaryObject.id];
   }
+
+  logger.tag(bodyPayload.id).info("object received from", roomId, "(delta =", deltaTime, "ms)");
 
   // Acknowledge the neighbouring room server that the body has been promoted
 }
@@ -250,6 +266,7 @@ const handleObjectTransfer = (body, roomId) => {
 
   logger.tag(body.id).info("transferring to", roomId);
   body.isTransferring = true;
+  body.sentAt = Date.now();
 
   // Is this body a player? If so, tell the client to change room
   if (body.clientSocket) {
@@ -261,7 +278,12 @@ const handleObjectTransfer = (body, roomId) => {
   // (Is the neighbouring room server available?)
 
   // Contact the neighbouring room server and tell it to promote this body to a primary object to start simulating it
-  sendServerMessage(roomId, 'objectTransfer', serializePrimaryBody(body))
+  const serializedObject = serializePrimaryBody(body)
+  if (body.currentInput) {
+    serializedObject.currentInput = body.currentInput
+  }
+
+  sendServerMessage(roomId, 'objectTransfer', serializedObject)
 
   // Once the neighbouring room server has promoted the body, demote it to a replica on this server
   removePrimaryObject(body.id);
@@ -308,15 +330,13 @@ const startGame = (clientIO) => {
   Matter.Events.on(engine, 'collisionStart', handleObjectCollision);
 
   const gameTick = () => {
-    Matter.Engine.update(engine, tickTime);
     processUpdate(clientIO);
+    Matter.Engine.update(engine, TICK_TIME_MS);
   }
 
-  // Run the game at 20 ticks per second
-  const tickTime = 1000 / 20;
   setInterval(() => {
     measureTime("tick", gameTick);
-  }, tickTime);
+  }, TICK_TIME_MS);
 
   // Log the tick time every 30 seconds
   setInterval(() => {

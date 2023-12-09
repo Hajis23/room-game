@@ -1,3 +1,4 @@
+import Matter from 'matter-js';
 import Phaser from 'phaser';
 
 /* eslint-disable */
@@ -13,7 +14,17 @@ const hashString = (str) => {
 }
 /* eslint-enable */
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
+export default class Player extends Phaser.GameObjects.Sprite {
+  /**
+   * @type {Phaser.Physics.Matter.MatterBody}
+   */
+  body = null;
+
+  /**
+   * @type {Phaser.Physics.Matter.MatterBody}
+   */
+  serverTrackingBody = null;
+
   /**
    *
    * @param {Phaser.Scene} scene
@@ -39,14 +50,36 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
 
     // Add physics
-    scene.physics.add.existing(this);
+    this.body = scene.matter.add.gameObject(this, {
+      shape: 'rectangle',
+      width: 20,
+      height: 12,
+      // offset: { x: 14, y: 40 },
+      mass: 100,
+      frictionAir: 0.5,
+      collisionFilter: {
+        category: 0x0001,
+        mask: 0x0000,
+      }
+    }).body;
+
+    this.serverTrackingBody = scene.matter.add.rectangle(this.x, this.y, 1, 1, {
+      isStatic: true,
+      collisionFilter: {
+        category: 0x0002,
+        mask: 0x0000,
+      },
+    })
+    // Spring connecting to server position
+    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.01, {
+      pointA: { x: 0, y: 0 },
+      pointB: { x: 0, y: 0 },
+      damping: 0.01,
+    })
 
     const nameText = scene.add.text(0, 0, id, { fontSize: '14px', fill: '#fff' }).setOrigin(0.5, 0.5).setPosition(this.x, this.y - 15);
     nameText.scale = 0.2;
     this.nameText = nameText;
-
-    this.body.setSize(20, 12, false);
-    this.body.setOffset(14, 40);
 
     // Create animations
     this.anims.create({
@@ -86,19 +119,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   update() {
+    Matter.Body.setAngularVelocity(this.body, 0);
+
+    super.update()
+
     // Make text follow player
-    this.nameText.setPosition(this.x, this.y - 15);
+    this.nameText.setPosition(this.body.position.x + 5, this.body.position.y - 15);
     // Player draw order based on y position
     this.depth = this.y;
     // Draw text above player
     this.nameText.depth = this.depth + 1;
 
+
     if (this.isDead) return;
 
     const isRunning = this.animationState === 'walk' || Object.values(this.clientInput).some((v) => v);
-    if (!this.anims) {
-      console.log(this)
-    }
+
     const isRolling = this.anims.currentAnim.key === 'roll' && !this.anims.currentFrame.isLast;
     if (isRolling) { // Keep rolling until anim ends...
       return;
