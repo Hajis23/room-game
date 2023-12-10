@@ -71,7 +71,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
       },
     })
     // Spring connecting to server position
-    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.01, {
+    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.005, {
       pointA: { x: 0, y: 0 },
       pointB: { x: 0, y: 0 },
       damping: 0.01,
