@@ -248,7 +248,7 @@ const receiveObjectTransfer = (bodyPayload, roomId, roomSocket) => {
   const primaryObject = createPrimaryObject(bodyPayload);
 
   // Dead reckoning
-  const deltaTime = (Date.now() - bodyPayload.sentAt) * (1 / Matter.Body._baseDelta);
+  const deltaTime = (Date.now() - bodyPayload.sentAt) / Matter.Body._baseDelta;
   const dx = deltaTime * bodyPayload.velocity.x;
   const dy = deltaTime * bodyPayload.velocity.y;
   Matter.Body.setPosition(primaryObject, Matter.Vector.add(primaryObject.position, { x: dx, y: dy}))

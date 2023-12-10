@@ -54,9 +54,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
       shape: 'rectangle',
       width: 10,
       height: 14,
-      // offset: { x: 14, y: 40 },
+      frictionAir: 0.25, 
+      frictionStatic: 0.5, 
+      friction: 0.1, 
       mass: 100,
-      frictionAir: 0.5,
       collisionFilter: {
         category: 0x0001,
         mask: 0x0000,
@@ -71,10 +72,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
       },
     })
     // Spring connecting to server position
-    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.005, {
+    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.003, {
       pointA: { x: 0, y: 0 },
       pointB: { x: 0, y: 0 },
-      damping: 0.01,
+      damping: 0.02,
     })
 
     const nameText = scene.add.text(0, 0, id, { fontSize: '14px', fill: '#fff' }).setOrigin(0.5, 0.5).setPosition(this.x, this.y - 15);
@@ -121,7 +122,19 @@ export default class Player extends Phaser.GameObjects.Sprite {
   update() {
     Matter.Body.setAngularVelocity(this.body, 0);
 
-    super.update()
+    const {
+      up, down, left, right,
+    } = this.clientInput;
+
+    let x = 0;
+    let y = 0;
+
+    if (up) y -= 0.07;
+    if (down) y += 0.07;
+    if (left) x -= 0.07;
+    if (right) x += 0.07;
+
+    Matter.Body.applyForce(this.body, this.body.position, { x, y });
 
     // Make text follow player
     this.nameText.setPosition(this.body.position.x + 5, this.body.position.y - 15);
@@ -140,9 +153,9 @@ export default class Player extends Phaser.GameObjects.Sprite {
       return;
     }
 
-    if (this.clientInput.left) {
+    if (left) {
       this.setFlipX(true);
-    } else if (this.clientInput.right) {
+    } else if (right) {
       this.setFlipX(false);
     }
 
@@ -151,6 +164,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
     } else {
       this.anims.play('idle', true);
     }
+
+    super.update()
   }
 
   destroy() {
