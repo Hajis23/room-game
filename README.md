@@ -23,7 +23,7 @@ After that client can be run with
 ```
 npm run client
 ```
-and server can be run with
+and server can be run from the root with
 ```
 npm run room_server
 ```
