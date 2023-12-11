@@ -1,4 +1,4 @@
 PORT=4003
 NAME=server3
 ROOM_ID=room3
-OTHER_SERVERS=[{ "address": "server1:3000", "id": "room1" }, { "address": "server2:4000", "id": "room2" }]
+COORDINATOR=localhost:3131

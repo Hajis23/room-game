@@ -1,29 +1,23 @@
 import { io, Socket } from "socket.io-client"; 
+import {toHttpAddress, toWsAddress} from './utils.js';
 import logger from "./logger.js";
 
 /**
  * @type {{ address: string, id: string}[]}
  */
-const neighbourList = JSON.parse(process.env.OTHER_SERVERS);
-
-const inProduction = process.env.NODE_ENV === 'production';
-
-const toHttpAddress = (address) => {
-  // Address has no protocol, add it.
-  return inProduction ? `https://${address}` : `http://${address}`;
-}
-
-const toWsAddress = (address) => {
-  // Address has no protocol, add it.
-  return inProduction ? `wss://${address}` : `ws://${address}`;
-}
+let neighbourList = [];
 
 /**
  * @type {{ [id: string]: Socket }}
  */
-const serverSockets = Object.fromEntries(
-  neighbourList.map(({ id, address }) => [id, io(toWsAddress(address), { auth: { roomId: process.env.ROOM_ID, type: 'room' } })])
-)
+let serverSockets = {};
+
+export const setNeighbours = (neighbours) => {
+  neighbourList = neighbours;
+  serverSockets = Object.fromEntries(
+    neighbourList.map(({ id, address }) => [id, io(toWsAddress(address), { auth: { roomId: process.env.ROOM_ID, type: 'room' } })])
+  );
+}
 
 export const getAddressForRoom = (roomId) => {
   const neighbour = neighbourList.find(({ id }) => id === roomId)

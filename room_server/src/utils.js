@@ -38,6 +38,18 @@ const getAverageTime = (name, reset = false) => {
   return avg;
 }
 
+const inProduction = process.env.NODE_ENV === 'production';
+
+export const toHttpAddress = (address) => {
+  // Address has no protocol, add it.
+  return inProduction ? `https://${address}` : `http://${address}`;
+}
+
+export const toWsAddress = (address) => {
+  // Address has no protocol, add it.
+  return inProduction ? `wss://${address}` : `ws://${address}`;
+}
+
 const { ROOM_ID } = process.env;
 
 export { measureTime, getAverageTime, ROOM_ID };

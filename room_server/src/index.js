@@ -5,7 +5,9 @@ import { startGame } from './game.js';
 
 import registerClientHandlers from './clientHandler.js';
 import registerServerHandlers from './serverHandler.js';
+import { getNeighbours } from './coordinatorHandler.js';
 import logger from './logger.js';
+import { setNeighbours } from './serverSocket.js';
 
 // A simple http server to ping:
 
@@ -24,6 +26,12 @@ const io = new Server(server, {
 
 const USER = 'user';
 const ROOM = 'room';
+
+console.log("fetching neighbours...")
+const neighbours = await getNeighbours(process.env.ROOM_ID);
+console.log("neighbours:",neighbours)
+setNeighbours(neighbours);
+
 
 // Connections from clients
 io.on('connection', (socket) => {

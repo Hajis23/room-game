@@ -21,7 +21,8 @@ const io = new Server(server, {
 const users = [];
 const socketIdToUser = {};
 
-const roomServers = JSON.parse(process.env.SERVERS)
+const roomServers = JSON.parse(process.env.SERVERS);
+const roomNeighbours = JSON.parse(process.env.ROOM_NEIGHBOURS);
 
 const deleteUserBySocketId = (socketId)  => {
   if(socketIdToUser[socketId]){
@@ -58,5 +59,9 @@ io.on('connection', (socket) => {
     respond(roomServers);
   });
 
+  socket.on('get_room_neighbours', (roomId, respond) => {
+    respond(roomNeighbours[roomId] ? roomNeighbours[roomId] : []);
+  });
+  
   console.log('connection');
 });
