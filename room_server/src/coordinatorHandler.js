@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { inProduction, toWsAddress } from "./utils.js";
+import { toWsAddress } from "./utils.js";
 
 const fetchNeighbours = (socket, roomId) => {
     return new Promise((resolve) => {
@@ -9,9 +9,9 @@ const fetchNeighbours = (socket, roomId) => {
     });
 }
 
-const fetchRoomId = (socket, ownAddress) => {
+const fetchRoomId = (socket) => {
     return new Promise((resolve) => {
-        socket.emit('register_room_server', ownAddress, (response, respond) => {
+        socket.emit('register_room_server', process.env.PORT, (response, respond) => {
           resolve(response)
         });
     });
@@ -46,6 +46,5 @@ export const getNeighbours = async (roomId) => {
 export const getRoomId = async () => {
     const address = toWsAddress(process.env.COORDINATOR);
     const socket = io(address);
-    const ownAddress = process.env.ADDRESS;
-    return await fetchRoomId(socket, ownAddress);
+    return await fetchRoomId(socket);
 }

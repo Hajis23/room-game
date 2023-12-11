@@ -65,8 +65,9 @@ io.on('connection', (socket) => {
     respond(roomNeighbours[roomId] ? roomNeighbours[roomId] : []);
   });
 
-  socket.on('register_room_server', (serverAddress, respond) => {
+  socket.on('register_room_server', (serverPort, respond) => {
     const roomId = offlineRoomServers.pop();
+    const serverAddress = `[${socket.handshake.address}]:${serverPort}`
     roomServers[roomId] = serverAddress;
     console.log("registered", serverAddress, "as", roomId);
     respond(roomId);

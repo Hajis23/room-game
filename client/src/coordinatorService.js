@@ -43,7 +43,7 @@ function requestRoomServers(){
         if(inDevelopment){ //inside docker-compose room server addresses are container names, but the client must connect to localhost
           let result = {}
           for(const roomName in response){
-            const port = response[roomName].split(':')[1]
+            const port = response[roomName].split(':').at(-1)
             result[roomName] = `localhost:${port}`
           }
           resolve(result);
