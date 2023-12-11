@@ -9,29 +9,43 @@ const fetchNeighbours = (socket, roomId) => {
     });
 }
 
-const fetchRoomServers = (socket) => {
+const fetchRoomId = (socket, ownAddress) => {
     return new Promise((resolve) => {
-        socket.emit('get_room_servers', (response, respond) => {
+        socket.emit('register_room_server', ownAddress, (response, respond) => {
           resolve(response)
         });
     });
 }
 
-
-const address = toWsAddress(process.env.COORDINATOR);
+const fetchRoomAddress = (socket, roomId) => {
+    return new Promise((resolve) => {
+        socket.emit('get_room_server_address', roomId, (response, respond) => {
+          resolve(response)
+        });
+    });
+}
 
 export const getNeighbours = async (roomId) => {
-    console.log(address)
-    const socket = io(address);
-    const servers = await fetchRoomServers(socket);
-    const neighbours = await fetchNeighbours(socket, roomId);
-    return neighbours.map(name => {
-        let address = servers[name];
-        if (!inProduction) {
-            // Hack
-            address = `${name}:${address.split(":")[1]}`;
+    const socketAddr = toWsAddress(process.env.COORDINATOR);
+    console.log(socketAddr)
+    const socket = io(socketAddr);
+    const neighbourNames = await fetchNeighbours(socket, roomId);
+    
+    const neighbours = await Promise.all(neighbourNames.map(async name => {
+        let address = "";
+        while(address === ""){ //poll coordinator until it knows the address of neighbour
+            address = await fetchRoomAddress(socket, name);
         }
-
         return {"id": name, "address": address }
-    })
+    }));
+
+    return neighbours
+}
+
+
+export const getRoomId = async () => {
+    const address = toWsAddress(process.env.COORDINATOR);
+    const socket = io(address);
+    const ownAddress = process.env.ADDRESS;
+    return await fetchRoomId(socket, ownAddress);
 }

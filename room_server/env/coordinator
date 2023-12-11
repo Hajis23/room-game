@@ -1,2 +1,2 @@
-SERVERS={ "room1":"localhost:3000", "room2":"localhost:4000", "room3":"localhost:4003", "fly.io": "wss://hajis-room-game-withered-dream-842.fly.dev/" }
+SERVERS=["room1","room2","room3"]
 ROOM_NEIGHBOURS={"room1": ["room2", "room3"], "room2" : ["room1", "room3"], "room3": ["room1", "room2"]}

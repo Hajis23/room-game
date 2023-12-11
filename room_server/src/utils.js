@@ -50,6 +50,11 @@ export const toWsAddress = (address) => {
   return inProduction ? `wss://${address}` : `ws://${address}`;
 }
 
-const { ROOM_ID } = process.env;
 
-export { measureTime, getAverageTime, ROOM_ID };
+
+import { getRoomId } from './coordinatorHandler.js';
+console.log("fetching roomId from coordinator...")
+export const ROOM_ID = await getRoomId();
+console.log("got roomId:", ROOM_ID)
+
+export { measureTime, getAverageTime };

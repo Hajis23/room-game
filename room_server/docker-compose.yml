@@ -9,12 +9,12 @@ services:
     image: room_server
     volumes:
       - ./:/usr/src/app
-    #network_mode: "host"
+    network_mode: "host"
     env_file: ./env/server1
     expose:
       - 3000
-    ports:
-      - 3000:3000
+    #ports:
+    #  - 3000:3000
 
   room2:
     build:
@@ -23,33 +23,33 @@ services:
     image: room_server
     volumes:
       - ./:/usr/src/app
-    #network_mode: "host"
+    network_mode: "host"
     env_file: ./env/server2
     expose:
       - 4000
-    ports:
-      - 4000:4000
+    #ports:
+    #  - 4000:4000
 
   room3:
     build:
       context: .
       dockerfile: dev.Dockerfile
-    #network_mode: "host"
+    network_mode: "host"
     image: room_server
     volumes:
       - ./:/usr/src/app
     env_file: ./env/server3
     expose:
       - 4003
-    ports:
-      - 4003:4003
+    #ports:
+    #  - 4003:4003
 
 
   coordinator:
     build:
       context: ../coordinator
       dockerfile: ../coordinator/Dockerfile
-    #network_mode: "host"
+    network_mode: "host"
     image: coordinator 
     env_file: ./env/coordinator
     volumes:
@@ -57,5 +57,5 @@ services:
         #env_file: ./env/server3
     expose:
       - 3131
-    ports:
-      - 3131:3131
+    #ports:
+    #  - 3131:3131

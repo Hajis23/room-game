@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client"; 
+import { ROOM_ID } from './utils.js'
 import {toHttpAddress, toWsAddress} from './utils.js';
 import logger from "./logger.js";
 
@@ -15,7 +16,7 @@ let serverSockets = {};
 export const setNeighbours = (neighbours) => {
   neighbourList = neighbours;
   serverSockets = Object.fromEntries(
-    neighbourList.map(({ id, address }) => [id, io(toWsAddress(address), { auth: { roomId: process.env.ROOM_ID, type: 'room' } })])
+    neighbourList.map(({ id, address }) => [id, io(toWsAddress(address), { auth: { roomId: ROOM_ID, type: 'room' } })])
   );
 }
 

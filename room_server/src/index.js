@@ -8,6 +8,7 @@ import registerServerHandlers from './serverHandler.js';
 import { getNeighbours } from './coordinatorHandler.js';
 import logger from './logger.js';
 import { setNeighbours } from './serverSocket.js';
+import { ROOM_ID } from './utils.js';
 
 // A simple http server to ping:
 
@@ -28,7 +29,7 @@ const USER = 'user';
 const ROOM = 'room';
 
 console.log("fetching neighbours...")
-const neighbours = await getNeighbours(process.env.ROOM_ID);
+const neighbours = await getNeighbours(ROOM_ID);
 console.log("neighbours:",neighbours)
 setNeighbours(neighbours);
 

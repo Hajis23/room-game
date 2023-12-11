@@ -1,4 +1,4 @@
-const { ROOM_ID } = process.env;
+import { ROOM_ID } from './utils.js';
 
 const formatTag = (tag) => `[${tag}]`;
 
