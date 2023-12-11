@@ -1,5 +1,5 @@
 import io from "socket.io-client";
-import { toWsAddress } from "./utils.js";
+import { inProduction, toWsAddress } from "./utils.js";
 
 const fetchNeighbours = (socket, roomId) => {
     return new Promise((resolve) => {
@@ -25,5 +25,13 @@ export const getNeighbours = async (roomId) => {
     const socket = io(address);
     const servers = await fetchRoomServers(socket);
     const neighbours = await fetchNeighbours(socket, roomId);
-    return neighbours.map(name => {return {"id": name, "address": servers[name]}})
+    return neighbours.map(name => {
+        let address = servers[name];
+        if (!inProduction) {
+            // Hack
+            address = `${name}:${address.split(":")[1]}`;
+        }
+
+        return {"id": name, "address": address }
+    })
 }

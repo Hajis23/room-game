@@ -44,7 +44,9 @@ export const sendServerMessage = (roomId, type, payload) => {
 // Ping neighbours after 1 second
 setTimeout(() => neighbourList.map(async ({ address }) => {
   try {
-    const res = await fetch(toHttpAddress(address))
+    const url = toHttpAddress(address)
+    console.log(url)
+    const res = await fetch(url)
     logger.info('neighbour', address, await res.text())
   } catch (e) {
     console.error('neighbour', address, e)

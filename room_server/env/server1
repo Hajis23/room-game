@@ -1,4 +1,4 @@
 PORT=3000
 NAME=server1
 ROOM_ID=room1
-COORDINATOR=localhost:3131
+COORDINATOR=coordinator:3131

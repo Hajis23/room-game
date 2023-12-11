@@ -38,7 +38,7 @@ const getAverageTime = (name, reset = false) => {
   return avg;
 }
 
-const inProduction = process.env.NODE_ENV === 'production';
+export const inProduction = process.env.NODE_ENV === 'production';
 
 export const toHttpAddress = (address) => {
   // Address has no protocol, add it.
