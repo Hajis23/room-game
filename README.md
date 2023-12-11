@@ -19,7 +19,7 @@ npm install
 
 First install dependencies to the client.
 
-After that client can be run with
+After that client can be run from the root with
 ```
 npm run client
 ```
