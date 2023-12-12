@@ -18,5 +18,14 @@ export default class Room {
 
     const roofLayer = map.createLayer('Roof', tileset);
     roofLayer.setDepth(2000);
+
+
+    // create colliders
+    const collisionObjects = map.getObjectLayer('collision').objects;
+    collisionObjects.filter((object) => object.rectangle).forEach((object) => {
+      const body = scene.matter.add.rectangle(object.x + (object.width / 2), object.y + (object.height / 2), object.width, object.height, { isStatic: true });
+      body.label = object.name;
+      body.collisionFilter.category = 0x0002;
+    });
   }
 }

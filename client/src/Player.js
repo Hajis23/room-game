@@ -49,25 +49,27 @@ export default class Player extends Phaser.GameObjects.Sprite {
     // Add the player to the scene
     scene.add.existing(this);
 
-    // Add physics
+    // Add the object to scene
     this.body = scene.matter.add.gameObject(this, {
-      shape: 'rectangle',
-      width: 10,
-      height: 20,
+      shape: {
+        type: 'rectangle',
+        width: 10,
+        height: 20,
+      },
       frictionAir: 0.25, 
       frictionStatic: 0.5, 
       friction: 0.1, 
       mass: 100,
       collisionFilter: {
         category: 0x0001,
-        mask: 0x0000,
-      }
-    }).body;
+        mask: 0x0002,
+      },
+    }).body
 
     this.serverTrackingBody = scene.matter.add.rectangle(this.x, this.y, 1, 1, {
       isStatic: true,
       collisionFilter: {
-        category: 0x0002,
+        category: 0x0004,
         mask: 0x0000,
       },
     })
