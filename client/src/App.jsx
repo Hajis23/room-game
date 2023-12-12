@@ -4,21 +4,24 @@ import { setDebug, startGame, stopGame } from './PhaserGame';
 import {useState} from 'react';
 
 import useCoordinator from './coordinatorService';
+import { inDevelopment } from './config';
 
 const App = () => {
   const [debug, setDebugState] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [ checkUsername, logoutFromCoordinator, roomServers ] = useCoordinator();
 
-  function login(address, username) {
-    console.log("joining to", address)
-    checkUsername(username).then(({invalid}) => {
+  function login(username) {
+    checkUsername(username).then(({invalid, roomServer, error}) => {
       if(invalid){
-        alert("Username is already taken");
+        alert(error);
       }else{
         setAuthenticated(true);
         setDebug(debug);
-        startGame(address, username);
+        //Hack for connecting to room servers running in docker-compose
+        const roomAddr = inDevelopment ? `localhost:${roomServer.split(':').at(-1)}` : roomServer;
+        console.log("joining to", roomAddr);
+        startGame(roomAddr, username);
       }
     });
   }
@@ -58,8 +61,6 @@ const App = () => {
 
 function Login({login, addresses}) {
   const [username, setUsername] = useState("");
-  const [serverName, setServerName] = useState("room1"); //TODO: remove hardcoded servername
-
 
   function handleChange(event) {
     setUsername(event.target.value)
@@ -67,19 +68,9 @@ function Login({login, addresses}) {
 
   return (
     <div>
-      <p>Select a server</p>
-      <div>
-        {Object.keys(addresses).map(a => (
-          <p key={a}>
-            <input id={a} type="radio" name="address" value={a} onChange={(e) => setServerName(e.target.value)} checked={serverName === a}/>
-            <label htmlFor={a}>{a}</label>
-          </p>
-        ))}
-      </div>
-  
       <form onSubmit={e => e.preventDefault()}>
         <input value={username} onChange={handleChange} autoFocus placeholder='Your player name'/>
-        <button onClick={() => login(addresses[serverName], username)}>Login</button>
+        <button onClick={() => login(username)}>Login</button>
       </form>
     </div>
   )

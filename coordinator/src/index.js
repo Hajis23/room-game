@@ -47,13 +47,13 @@ io.on('connection', (socket) => {
 
   socket.on('check', (username, callback) => {
     if (users.includes(username)) {
-      console.log("invalid");
-      callback({ invalid: true });
+      callback({ invalid: true , error: "Username is already taken"});
+    } else if (!roomServers["room1"]) {
+      callback({ invalid: true, error: "There's no room server for room1"});
     } else {
-      console.log("valid");
       users.push(username);
       socketIdToUser[socket.id] = username;
-      callback({ invalid: false });
+      callback({ invalid: false, roomServer: roomServers["room1"] });
     }
   });
 

@@ -36,36 +36,14 @@ function logoutFromCoordinator(){
   });
 }
 
-function requestRoomServers(){
-  return new Promise((resolve) => {
-    socket.emit('get_room_servers', (response, respond) => {
-      if(response){
-        if(inDevelopment){ //inside docker-compose room server addresses are container names, but the client must connect to localhost
-          let result = {}
-          for(const roomName in response){
-            const port = response[roomName].split(':').at(-1)
-            result[roomName] = `localhost:${port}`
-          }
-          resolve(result);
-        }else{
-          resolve(response);
-        }
-      }
-      
-    });
-  });
-}
 
 function useCoordinator() {
-  const [roomServers, setRoomServers] = useState({});
   useEffect(() => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
-
-    requestRoomServers().then(servers => setRoomServers(servers));
   }, []);
 
-  return [ checkUsername, logoutFromCoordinator, roomServers, status ];
+  return [ checkUsername, logoutFromCoordinator, status ];
 }
 
 export default useCoordinator;
