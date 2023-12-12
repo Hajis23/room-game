@@ -1,10 +1,11 @@
 import Matter from 'matter-js';
 import { Socket } from 'socket.io-client'
 
-import { measureTime, getAverageTime, ROOM_ID } from './utils.js';
+import { measureTime, getAverageTime } from './utils.js';
 import loadTiledMap from './tiledMapParser.js';
 import { broadcastServerMessage, getAddressForRoom, sendServerMessage } from './serverSocket.js';
 import logger from './logger.js';
+import { ROOM_ID } from './coordinatorClient.js';
 
 /**
  * (Someone can expand this typedef but id is enough for now.)

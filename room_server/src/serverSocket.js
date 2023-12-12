@@ -1,39 +1,68 @@
 import { io, Socket } from "socket.io-client"; 
-import { ROOM_ID } from './utils.js'
+import { inProduction } from './utils.js'
 import {toHttpAddress, toWsAddress} from './utils.js';
 import logger from "./logger.js";
+import { ROOM_ID } from "./coordinatorClient.js";
 
 /**
- * @type {{ address: string, id: string}[]}
+ * @type {{  }}
  */
-let neighbourList = [];
+export let neighbours = {};
 
 /**
- * @type {{ [id: string]: Socket }}
+ * 
+ * @param {{ [roomId: string]: { address: string, host: string } }} newNeighbours 
  */
-let serverSockets = {};
+export const setNeighbours = (newNeighbours) => {
+  console.log(newNeighbours)
+  Object.entries(newNeighbours).forEach(([id, { address, host }]) => {
+  
+    if (neighbours[id]) {
+      // Check if address same
+      const currentAddress = neighbours[id].address;
+      if (currentAddress === address) {
+        return;
+      }
+      // Else disconnect old socket
+      neighbours[id].socket.disconnect();
+    }
 
-export const setNeighbours = (neighbours) => {
-  neighbourList = neighbours;
-  serverSockets = Object.fromEntries(
-    neighbourList.map(({ id, address }) => [id, io(toWsAddress(address), { auth: { roomId: ROOM_ID, type: 'room' } })])
-  );
+    // Development mode hack: address is host:port
+    if (!inProduction) {
+      address = `${host}:${address.split(':').at(-1)}`
+    }
+
+    logger.info('connecting to neighbour', id, toWsAddress(address))
+    const socket = io(toWsAddress(address), {
+      auth: {
+        type: 'room',
+        roomId: ROOM_ID,
+      }
+    });
+
+    neighbours[id] = {
+      id,
+      address,
+      socket,
+    };
+  })
 }
 
 export const getAddressForRoom = (roomId) => {
-  const neighbour = neighbourList.find(({ id }) => id === roomId)
+  const neighbour = neighbours[roomId]
   if (!neighbour) throw new Error(`No neighbour found for room ${roomId}`)
   return toWsAddress(neighbour.address)
 }
 
 export const broadcastServerMessage = (type, payload) => {
-  Object.values(serverSockets).forEach((socket) => {
+  Object.values(neighbours).forEach(({ socket }) => {
     socket.emit(type, payload)
   })
 }
 
 export const sendServerMessage = (roomId, type, payload) => {
-  const socket = serverSockets[roomId]
+  const socket = neighbours[roomId]?.socket
+
   if (socket) {
     socket.emit(type, payload)
   } else {
@@ -43,13 +72,12 @@ export const sendServerMessage = (roomId, type, payload) => {
 
 
 // Ping neighbours after 1 second
-setTimeout(() => neighbourList.map(async ({ address }) => {
+setTimeout(() => Object.values(neighbours).map(async ({ address }) => {
   try {
     const url = toHttpAddress(address)
-    console.log(url)
     const res = await fetch(url)
-    logger.info('neighbour', address, await res.text())
+    logger.info('HTTP ping to neighbour', url, await res.text())
   } catch (e) {
-    console.error('neighbour', address, e)
+    console.error('HTTP ping to neighbour', address, e)
   }
 }), 1000)

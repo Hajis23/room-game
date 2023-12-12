@@ -1,9 +1,9 @@
 import Matter from 'matter-js';
 
-import { ROOM_ID } from './utils.js';
 import logger from './logger.js';
 
 import mapJSON from "../base3.json" with { type: "json" };
+import { ROOM_ID } from './coordinatorClient.js';
 
 const loadTiledMap = () => {
 

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
 
-  room1:
+  server1:
     build:
       context: .
       dockerfile: dev.Dockerfile
@@ -11,12 +11,14 @@ services:
       - ./:/usr/src/app
     #network_mode: "host"
     env_file: ./env/server1
+    environment:
+      - HOST=server1
     expose:
       - 3000
     ports:
       - 3000:3000
 
-  room2:
+  server2:
     build:
       context: .
       dockerfile: dev.Dockerfile
@@ -25,12 +27,14 @@ services:
       - ./:/usr/src/app
     #network_mode: "host"
     env_file: ./env/server2
+    environment:
+      - HOST=server2
     expose:
       - 4000
     ports:
       - 4000:4000
 
-  room3:
+  server3:
     build:
       context: .
       dockerfile: dev.Dockerfile
@@ -39,6 +43,8 @@ services:
     volumes:
       - ./:/usr/src/app
     env_file: ./env/server3
+    environment:
+      - HOST=server3
     expose:
       - 4003
     ports:

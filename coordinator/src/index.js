@@ -26,19 +26,63 @@ let offlineRoomServers = JSON.parse(process.env.SERVERS);
 
 const roomNeighbours = JSON.parse(process.env.ROOM_NEIGHBOURS);
 
+const startingRoomId = process.env.STARTING_ROOM_ID;
+
+const getStartingRoomServer = () => {
+  return Object.values(roomServers).find(({ roomId }) => roomId === startingRoomId);
+}
+
 const deleteUserBySocketId = (socketId)  => {
-  if(socketIdToUser[socketId]){
+  if (socketIdToUser[socketId]){
     const id = users.indexOf(socketIdToUser[socketId]);
     users.splice(id, 1);
     delete socketIdToUser[socketId];
   }
 }
 
+const sendHeartbeat = () => {
+  io.to("room_servers").emit("heartbeat", { 
+    roomServers: Object.fromEntries(Object.entries(roomServers).map(([, { serverAddress, roomId, serverHost }]) => [roomId, { address: serverAddress, host: serverHost }])), // { roomId: { address, host } }
+    roomNeighbours,
+  });
+}
+
 io.on('connection', (socket) => {
+  const isRoomServer = socket.handshake.auth.type === "room";
+
+  if (isRoomServer) {
+    // This is where we send heartbeats
+    socket.join("room_servers");
+
+    const roomId = offlineRoomServers.pop();
+    if (!roomId) {
+      console.error("no more rooms left");
+      return;
+    }
+
+    const serverPort = socket.handshake.auth.port;
+    const serverHost = socket.handshake.auth.host;
+
+    const serverAddress = `[${socket.handshake.address}]:${serverPort}`
+    roomServers[socket.id] = { serverAddress, roomId, serverHost };
+    console.log('connection', socket.id, roomServers, offlineRoomServers);
+    console.log("registered", serverAddress, "as", roomId);
   
+    socket.emit("assignment", roomId);
+
+    sendHeartbeat();
+  }
+
   socket.on('disconnect', (reason) => {
-    console.log('disconnect');
-    deleteUserBySocketId(socket.id);
+    if (isRoomServer) {
+      console.log('disconnect', socket.id, roomServers, offlineRoomServers);
+      const roomId = roomServers[socket.id].roomId;
+      delete roomServers[socket.id];
+      offlineRoomServers.push(roomId);
+      sendHeartbeat();
+    } else {
+      deleteUserBySocketId(socket.id);
+    }
   });
 
   socket.on('logout', () => {
@@ -46,40 +90,16 @@ io.on('connection', (socket) => {
   });
 
   socket.on('check', (username, callback) => {
+    const startingRoomServer = getStartingRoomServer();
+  
     if (users.includes(username)) {
       callback({ invalid: true , error: "Username is already taken"});
-    } else if (!roomServers["room1"]) {
-      callback({ invalid: true, error: "There's no room server for room1"});
+    } else if (!startingRoomServer) {
+      callback({ invalid: true, error: "Cannot connect to starting room!"});
     } else {
       users.push(username);
       socketIdToUser[socket.id] = username;
-      callback({ invalid: false, roomServer: roomServers["room1"] });
+      callback({ invalid: false, roomServer: startingRoomServer.serverAddress, roomId: startingRoomServer.roomId });
     }
   });
-
-  socket.on('get_room_servers', (respond) => {
-    respond(roomServers);
-  });
-
-  socket.on('get_room_neighbours', (roomId, respond) => {
-    respond(roomNeighbours[roomId] ? roomNeighbours[roomId] : []);
-  });
-
-  socket.on('register_room_server', (serverPort, respond) => {
-    const roomId = offlineRoomServers.pop();
-    const serverAddress = `[${socket.handshake.address}]:${serverPort}`
-    roomServers[roomId] = serverAddress;
-    console.log("registered", serverAddress, "as", roomId);
-    respond(roomId);
-  });
-  
-  socket.on('get_room_server_address', (roomId, respond) => {
-    if (roomServers[roomId]){
-      respond(roomServers[roomId]);
-    }else{
-      respond("");
-    }
-  })
-
-  console.log('connection');
 });

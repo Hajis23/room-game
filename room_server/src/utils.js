@@ -5,7 +5,7 @@ const timings = {};
  * @param {*} name
  * @param {*} fn
  */
-const measureTime = (name, fn) => {
+export const measureTime = (name, fn) => {
   const startMs = Date.now();
   fn();
   const endMs = Date.now();
@@ -28,7 +28,7 @@ const measureTime = (name, fn) => {
  * @param {*} reset
  * @returns
  */
-const getAverageTime = (name, reset = false) => {
+export const getAverageTime = (name, reset = false) => {
   const timing = timings[name];
   if (!timing) return 0;
   const avg = timing.total / timing.count;
@@ -49,12 +49,3 @@ export const toWsAddress = (address) => {
   // Address has no protocol, add it.
   return inProduction ? `wss://${address}` : `ws://${address}`;
 }
-
-
-
-import { getRoomId } from './coordinatorHandler.js';
-console.log("fetching roomId from coordinator...")
-export const ROOM_ID = await getRoomId();
-console.log("got roomId:", ROOM_ID)
-
-export { measureTime, getAverageTime };

@@ -1,10 +1,13 @@
-import { ROOM_ID } from './utils.js';
-
 const formatTag = (tag) => `[${tag}]`;
 
 const logger = {
-  _defaultTag: formatTag(ROOM_ID),
+  _defaultTag: null,
   _tag: null,
+
+  setDefaultTag(tag) {
+    this._defaultTag = formatTag(tag);
+    return this;
+  },
 
   tag(tag) {
     this._tag = formatTag(tag);

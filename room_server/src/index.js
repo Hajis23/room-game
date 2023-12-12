@@ -5,10 +5,11 @@ import { startGame } from './game.js';
 
 import registerClientHandlers from './clientHandler.js';
 import registerServerHandlers from './serverHandler.js';
-import { getNeighbours } from './coordinatorHandler.js';
 import logger from './logger.js';
-import { setNeighbours } from './serverSocket.js';
-import { ROOM_ID } from './utils.js';
+import './coordinatorClient.js';
+import { waitForRoomAssignment } from './coordinatorClient.js';
+
+await waitForRoomAssignment();
 
 // A simple http server to ping:
 
@@ -28,12 +29,6 @@ const io = new Server(server, {
 const USER = 'user';
 const ROOM = 'room';
 
-console.log("fetching neighbours...")
-const neighbours = await getNeighbours(ROOM_ID);
-console.log("neighbours:",neighbours)
-setNeighbours(neighbours);
-
-
 // Connections from clients
 io.on('connection', (socket) => {
   const { auth } = socket.handshake;
@@ -48,4 +43,4 @@ io.on('connection', (socket) => {
 // Start the game
 startGame(io);
 
-logger.info(`${process.env.NAME}, PORT = ${process.env.PORT}`)
+logger.info(`PORT = ${process.env.PORT}`)
