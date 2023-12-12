@@ -142,7 +142,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
     // Player draw order based on y position
     this.depth = this.y;
     // Draw text above player
-    this.nameText.depth = this.depth + 1;
+    this.nameText.depth = this.depth + 2000;
 
 
     if (this.isDead) return;
