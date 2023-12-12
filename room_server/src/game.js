@@ -215,7 +215,7 @@ const createPrimaryObject = (bodyPayload) => {
     bodyPayload.position.x,
     bodyPayload.position.y,
     10,
-    14,
+    20,
     {
       isStatic: false, frictionAir: 0.25, frictionStatic: 0.5, friction: 0.1, mass: 100,
     },

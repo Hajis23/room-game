@@ -9,9 +9,7 @@ export default function (io, socket) {
   function input(data) {
     const { id } = socket.handshake.auth;
 
-    setTimeout(() => { // Simulate latency
-      setCurrentPlayerInput(id, data);
-    }, 0);
+    setCurrentPlayerInput(id, data);
   }
 
   function disconnect(reason) {

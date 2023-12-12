@@ -51,7 +51,7 @@ export default class MainScene extends Phaser.Scene {
    */
   preload() {
     this.load.image('tilesheet', 'assets/Tileset.png');
-    this.load.tilemapTiledJSON('tilemap', 'assets/base2.json');
+    this.load.tilemapTiledJSON('tilemap', 'assets/base3.json');
     this.load.spritesheet('charactersheet', 'assets/playerSpriteSheet.png', { frameWidth: 47, frameHeight: 53 });
   }
 
@@ -82,7 +82,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Init camera
     this.cameras.main.setBounds(0, 0, this.room.widthInPixels, this.room.heightInPixels);
-    this.cameras.main.setZoom(6);
+    this.cameras.main.setZoom(4);
 
     // When creating scene, start_game event is not yet captured so start game manually here
     this.startGame();

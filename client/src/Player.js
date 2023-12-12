@@ -16,12 +16,12 @@ const hashString = (str) => {
 
 export default class Player extends Phaser.GameObjects.Sprite {
   /**
-   * @type {Phaser.Physics.Matter.MatterBody}
+   * @type {Matter.Body}
    */
   body = null;
 
   /**
-   * @type {Phaser.Physics.Matter.MatterBody}
+   * @type {Matter.Body}
    */
   serverTrackingBody = null;
 
@@ -53,7 +53,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
     this.body = scene.matter.add.gameObject(this, {
       shape: 'rectangle',
       width: 10,
-      height: 14,
+      height: 20,
       frictionAir: 0.25, 
       frictionStatic: 0.5, 
       friction: 0.1, 
@@ -72,10 +72,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
       },
     })
     // Spring connecting to server position
-    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.003, {
+    scene.matter.add.constraint(this.body, this.serverTrackingBody, 0, 0.002, {
       pointA: { x: 0, y: 0 },
       pointB: { x: 0, y: 0 },
-      damping: 0.02,
+      damping: 0.05,
+      angularStiffness: 0.5,
     })
 
     const nameText = scene.add.text(0, 0, id, { fontSize: '14px', fill: '#fff' }).setOrigin(0.5, 0.5).setPosition(this.x, this.y - 15);
