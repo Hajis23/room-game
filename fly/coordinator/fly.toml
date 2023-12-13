@@ -14,14 +14,16 @@ primary_region = "arn"
 
 [env]
   PORT = "8080"
-  SERVERS = "{ \"room1\": \"hajis-room-game-withered-dream-842.fly.dev/\", \"room2\": \"room2.fly.dev/\", \"room3\": \"room3.fly.dev/\" }"
+  SERVERS = "[\"room1\",\"room2\",\"room3\"]"
+  ROOM_NEIGHBOURS = "{\"room1\": [\"room2\", \"room3\"], \"room2\" : [\"room1\", \"room3\"], \"room3\": [\"room1\", \"room2\"]}"
+  STARTING_ROOM_ID = "room1"
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = false
-  auto_start_machines = false
-  min_machines_running = 1
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
   [http_service.concurrency]
     type = "requests"
     hard_limit = 250

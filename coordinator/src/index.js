@@ -42,7 +42,7 @@ const deleteUserBySocketId = (socketId)  => {
 
 const sendHeartbeat = () => {
   io.to("room_servers").emit("heartbeat", { 
-    roomServers: Object.fromEntries(Object.entries(roomServers).map(([, { serverAddress, roomId, serverHost }]) => [roomId, { address: serverAddress, host: serverHost }])), // { roomId: { address, host } }
+    roomServers: Object.fromEntries(Object.entries(roomServers).map(([, { serverAddress, roomId, serverPort }]) => [roomId, { address: serverAddress, port: serverPort }])), // { roomId: { address, port } }
     roomNeighbours,
   });
 }
@@ -61,10 +61,9 @@ io.on('connection', (socket) => {
     }
 
     const serverPort = socket.handshake.auth.port;
-    const serverHost = socket.handshake.auth.host;
+    const serverAddress = socket.handshake.auth.address;
 
-    const serverAddress = `[${socket.handshake.address}]:${serverPort}`
-    roomServers[socket.id] = { serverAddress, roomId, serverHost };
+    roomServers[socket.id] = { serverAddress, roomId, serverPort };
     console.log('connection', socket.id, roomServers, offlineRoomServers);
     console.log("registered", serverAddress, "as", roomId);
   

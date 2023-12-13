@@ -11,11 +11,11 @@ export let neighbours = {};
 
 /**
  * 
- * @param {{ [roomId: string]: { address: string, host: string } }} newNeighbours 
+ * @param {{ [roomId: string]: { address: string, port: string } }} newNeighbours 
  */
 export const setNeighbours = (newNeighbours) => {
   console.log(newNeighbours)
-  Object.entries(newNeighbours).forEach(([id, { address, host }]) => {
+  Object.entries(newNeighbours).forEach(([id, { address, port }]) => {
   
     if (neighbours[id]) {
       // Check if address same
@@ -29,7 +29,7 @@ export const setNeighbours = (newNeighbours) => {
 
     // Development mode hack: address is host:port
     if (!inProduction) {
-      address = `${host}:${address.split(':').at(-1)}`
+      address = `${host}:${port}`
     }
 
     logger.info('connecting to neighbour', id, toWsAddress(address))

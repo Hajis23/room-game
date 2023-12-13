@@ -14,16 +14,15 @@ primary_region = "arn"
 
 [env]
   NAME = "server1"
-  OTHER_SERVERS = "[{ \"address\": \"room2.fly.dev/\", \"id\": \"room2\" }, { \"address\": \"room3.fly.dev\", \"id\": \"room3\" }]"
+  COORDINATOR = "hajis-room-game-coordinator.fly.dev"
   PORT = "8080"
-  ROOM_ID = "room1"
 
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = false
-  auto_start_machines = false
-  min_machines_running = 1
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
   [http_service.concurrency]
     type = "requests"
     hard_limit = 250

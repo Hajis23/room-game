@@ -1,6 +1,6 @@
 import logger from "./logger.js";
 import { setNeighbours } from "./serverSocket.js";
-import { toWsAddress } from "./utils.js";
+import { inProduction, toWsAddress } from "./utils.js";
 import { io } from "socket.io-client"; 
 
 export let ROOM_ID = null;
@@ -11,7 +11,7 @@ const coordinatorSocket = io(toWsAddress(process.env.COORDINATOR), {
   auth: { 
     type: 'room',
     port: process.env.PORT,
-    host: process.env.HOST,
+    address: inProduction ? `${process.env.FLY_APP_NAME}.fly.dev` : process.env.HOST,
   }
 });
 
