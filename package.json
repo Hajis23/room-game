@@ -5,6 +5,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
+		"install": "(cd client && npm install); (cd coordinator && npm install); (cd room_server && npm install)",
 		"client": "cd client && npm run start",
 		"room_server": "cd room_server && ./run.sh",
 		"lint": "eslint .",

@@ -19,17 +19,10 @@ The game features a simple dungeon-like map consisting of multiple rooms, create
 
 Make sure you have docker and npm installed.
 
-Install dependencies for the client, cd to `client/` and run:
+To install all dependencies run following command:
 ```
 npm install
 ```
-
-Install dependencies for the coordinator, cd to `coordinator/` and run:
-```
-npm install
-```
-
-The room server shouldn't need dependencies to be installed locally.
 
 ## Run
 
