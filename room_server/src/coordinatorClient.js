@@ -25,10 +25,10 @@ coordinatorSocket.on('assignment', (assignedRoomId) => {
   }
 })
 
-coordinatorSocket.on('heartbeat', async (payload) => {
+coordinatorSocket.on('topology_update', async (payload) => {
   await waitForRoomAssignment();
 
-  logger.info('received heartbeat', payload)
+  logger.info('received topology_update', payload)
 
   const { roomServers, roomNeighbours } = payload;
 

@@ -40,8 +40,8 @@ const deleteUserBySocketId = (socketId)  => {
   }
 }
 
-const sendHeartbeat = () => {
-  io.to("room_servers").emit("heartbeat", { 
+const sendTopologyUpdate = () => {
+  io.to("room_servers").emit("topology_update", { 
     roomServers: Object.fromEntries(Object.entries(roomServers).map(([, { serverAddress, roomId, serverPort }]) => [roomId, { address: serverAddress, port: serverPort }])), // { roomId: { address, port } }
     roomNeighbours,
   });
@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
   const isRoomServer = socket.handshake.auth.type === "room";
 
   if (isRoomServer) {
-    // This is where we send heartbeats
+    // This is where we send topology updates
     socket.join("room_servers");
 
     const roomId = offlineRoomServers.pop();
@@ -69,7 +69,7 @@ io.on('connection', (socket) => {
   
     socket.emit("assignment", roomId);
 
-    sendHeartbeat();
+    sendTopologyUpdate();
   }
 
   socket.on('disconnect', (reason) => {
@@ -78,7 +78,7 @@ io.on('connection', (socket) => {
       const roomId = roomServers[socket.id].roomId;
       delete roomServers[socket.id];
       offlineRoomServers.push(roomId);
-      sendHeartbeat();
+      sendTopologyUpdate();
     } else {
       deleteUserBySocketId(socket.id);
     }
