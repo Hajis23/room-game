@@ -1,4 +1,5 @@
 # Room game
+![hajis](https://github.com/user-attachments/assets/d3279a3d-7fbe-4875-afa8-beec1eb03e16)
 
 A prototype of a multi-server real-time online multiplayer game, implementing: 
 - simple Server Meshing / Spatial partitioning between server nodes.
